@@ -24,11 +24,6 @@
   <ItemGroup>
     <ClCompile Include="SkullDemo.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.vcxproj">
-      <Project>{f8363d07-7118-47a0-b6e9-87ef65d33485}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E82F693C-36C7-4A7D-882D-87D6660E38E2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
