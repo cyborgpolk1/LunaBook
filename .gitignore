@@ -15,3 +15,4 @@
 *.user
 [Bb]in/
 Common.lib
+*.VC.VC.opendb
