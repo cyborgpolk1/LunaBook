@@ -1,0 +1,16 @@
+*.exe
+*.suo
+*.ilk
+*.pdb
+*.cso
+*.iobj
+*.ipdb
+*.log
+*.idb
+*.tlog
+*.obj
+*.VC.db
+*.aps
+*.cache
+*.user
+[Bb]in/
