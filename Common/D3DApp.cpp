@@ -541,7 +541,7 @@ void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, 0, entry, "vs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "vs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
@@ -575,7 +575,7 @@ void D3DApp::CreateShader(ID3D11PixelShader** shader, LPCWSTR filename, LPCSTR e
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, 0, entry, "ps_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "ps_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
@@ -607,7 +607,7 @@ void D3DApp::CreateShader(ID3D11GeometryShader** shader, LPCWSTR filename, LPCST
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, 0, entry, "gs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "gs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
@@ -639,7 +639,7 @@ void D3DApp::CreateShader(ID3D11HullShader** shader, LPCWSTR filename, LPCSTR en
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, 0, entry, "hs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "hs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
@@ -671,7 +671,7 @@ void D3DApp::CreateShader(ID3D11DomainShader** shader, LPCWSTR filename, LPCSTR 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, 0, entry, "ds_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "ds_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
@@ -703,7 +703,7 @@ void D3DApp::CreateShader(ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, 0, entry, "cs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "cs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
