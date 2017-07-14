@@ -62,6 +62,18 @@ void SkullDemo::OnResize()
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
+
+	// EXERCISE 5.11
+	/*
+	mScreenViewport.TopLeftX = 0.0f;
+	mScreenViewport.TopLeftY = 0.0f;
+	mScreenViewport.Width = static_cast<float>(mClientWidth) / 2.0f;
+	mScreenViewport.Height = static_cast<float>(mClientHeight) / 2.0f;
+	mScreenViewport.MinDepth = 0.0f;
+	mScreenViewport.MaxDepth = 1.0f;
+
+	md3dImmediateContext->RSSetViewports(1, &mScreenViewport);
+	*/
 }
 
 void SkullDemo::UpdateScene(float dt) 

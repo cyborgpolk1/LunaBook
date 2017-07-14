@@ -13,6 +13,7 @@ struct Vertex
 struct MatrixBuffer
 {
 	XMMATRIX WorldViewProj;
+	float Time;
 };
 
 class PyramidAndBoxApp : public D3DApp
@@ -35,8 +36,8 @@ private:
 	void BuildFX();
 
 private:
-	ID3D11Buffer* mBoxVB;
-	ID3D11Buffer* mBoxIB;
+	ID3D11Buffer* mVB;
+	ID3D11Buffer* mIB;
 	ID3D11VertexShader* mVS;
 	ID3D11PixelShader* mPS;
 	ID3D11Buffer* mMatrixBuffer;
