@@ -88,6 +88,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\colorPS.hlsl = Shaders\colorPS.hlsl
 		Shaders\colorVS.hlsl = Shaders\colorVS.hlsl
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
+		LightHelper.hlsl = LightHelper.hlsl
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoxMod", "Source\BoxMod\BoxMod.vcxproj", "{EFA3114F-8B46-4276-AA5C-84E197233058}"
@@ -95,6 +96,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyramidAndBox", "Source\PyramidAndBox\PyramidAndBox.vcxproj", "{95245B21-3047-49C1-9539-53D057BD50E7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShapesMod", "Source\ShapesMod\ShapesMod.vcxproj", "{861A58F5-ED44-4AD3-9736-6F11B7AACECD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LitWaves", "Source\LitWaves\LitWaves.vcxproj", "{FFEB658B-740E-426C-99B1-43363B57ED04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -240,6 +243,14 @@ Global
 		{861A58F5-ED44-4AD3-9736-6F11B7AACECD}.Release|x64.Build.0 = Release|x64
 		{861A58F5-ED44-4AD3-9736-6F11B7AACECD}.Release|x86.ActiveCfg = Release|Win32
 		{861A58F5-ED44-4AD3-9736-6F11B7AACECD}.Release|x86.Build.0 = Release|Win32
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Debug|x64.ActiveCfg = Debug|x64
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Debug|x64.Build.0 = Debug|x64
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Debug|x86.ActiveCfg = Debug|Win32
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Debug|x86.Build.0 = Debug|Win32
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Release|x64.ActiveCfg = Release|x64
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Release|x64.Build.0 = Release|x64
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Release|x86.ActiveCfg = Release|Win32
+		{FFEB658B-740E-426C-99B1-43363B57ED04}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -261,5 +272,6 @@ Global
 		{EFA3114F-8B46-4276-AA5C-84E197233058} = {FE7821E7-9C3A-4553-9BAC-81197B88600F}
 		{95245B21-3047-49C1-9539-53D057BD50E7} = {FE7821E7-9C3A-4553-9BAC-81197B88600F}
 		{861A58F5-ED44-4AD3-9736-6F11B7AACECD} = {FE7821E7-9C3A-4553-9BAC-81197B88600F}
+		{FFEB658B-740E-426C-99B1-43363B57ED04} = {8606500B-6728-465A-A6D0-A810D4200572}
 	EndGlobalSection
 EndGlobal
