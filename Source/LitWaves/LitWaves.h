@@ -4,16 +4,29 @@
 #include "CommonLibs.h"
 #include "D3DApp.h"
 #include "Waves.h"
+#include "LightHelper.h"
 
 struct Vertex
 {
 	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
+	XMFLOAT3 Normal;
 };
 
-struct MatrixBuffer
+struct PerObjectBuffer
 {
+	XMMATRIX World;
+	XMMATRIX WorldInvTranspose;
 	XMMATRIX WorldViewProj;
+	Material Mat;
+};
+
+struct PerFrameBuffer
+{
+	DirectionalLight DirLight;
+	PointLight PLight;
+	SpotLight SLight;
+	XMFLOAT3 EyePosW;
+	float pad;
 };
 
 class LitWavesDemo : public D3DApp
@@ -33,6 +46,7 @@ public:
 
 private:
 	float GetHeight(float x, float z) const;
+	XMFLOAT3 GetHillNormal(float x, float z) const;
 	void BuildLandGeometryBuffers();
 	void BuildWavesGeometryBuffers();
 	void BuildFX();
@@ -45,7 +59,8 @@ private:
 
 	ID3D11VertexShader* mVS;
 	ID3D11PixelShader* mPS;
-	ID3D11Buffer* mMatrixBuffer;
+	ID3D11Buffer* mPerObjectBuffer;
+	ID3D11Buffer* mPerFrameBuffer;
 
 	ID3D11InputLayout* mInputLayout;
 
@@ -65,6 +80,14 @@ private:
 	float mRadius;
 
 	POINT mLastMousePos;
+
+	DirectionalLight mDirLight;
+	PointLight mPointLight;
+	SpotLight mSpotLight;
+	Material mLandMat;
+	Material mWavesMat;
+
+	XMFLOAT3 mEyePosW;
 };
 
 #endif

@@ -13,7 +13,7 @@ struct DirectionalLight
 	XMFLOAT4 Ambient;
 	XMFLOAT4 Diffuse;
 	XMFLOAT4 Specular;
-	XMFLOAT4 Direction;
+	XMFLOAT3 Direction;
 	float Pad;
 };
 

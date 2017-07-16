@@ -85,10 +85,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WavesDemo", "Source\WavesDe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B64C89-82E2-40E8-A696-C47E9604C231}"
 	ProjectSection(SolutionItems) = preProject
+		Shaders\BasicLighting.hlsl = Shaders\BasicLighting.hlsl
 		Shaders\colorPS.hlsl = Shaders\colorPS.hlsl
 		Shaders\colorVS.hlsl = Shaders\colorVS.hlsl
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
-		LightHelper.hlsl = LightHelper.hlsl
+		Shaders\LightHelper.hlsl = Shaders\LightHelper.hlsl
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoxMod", "Source\BoxMod\BoxMod.vcxproj", "{EFA3114F-8B46-4276-AA5C-84E197233058}"

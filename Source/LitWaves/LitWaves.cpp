@@ -9,8 +9,9 @@ D3DMAIN(LitWavesDemo);
 
 LitWavesDemo::LitWavesDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mLandVB(0), mLandIB(0), mWavesVB(0), mWavesIB(0), mVS(0), mPS(0),
-	mMatrixBuffer(0), mInputLayout(0), mWireframeRS(0), mGridIndexCount(0),
-	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(200.0f)
+	mPerObjectBuffer(0), mPerFrameBuffer(0), mInputLayout(0), mWireframeRS(0), mGridIndexCount(0),
+	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(200.0f), 
+	mEyePosW(0.0f, 0.0f, 0.0f)
 {
 	mMainWndCaption = L"Lit Waves Demo";
 
@@ -22,6 +23,32 @@ LitWavesDemo::LitWavesDemo(HINSTANCE hInstance)
 	XMStoreFloat4x4(&mWavesWorld, I);
 	XMStoreFloat4x4(&mView, I);
 	XMStoreFloat4x4(&mProj, I);
+
+	mDirLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLight.Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mDirLight.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mDirLight.Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+
+	mPointLight.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	mPointLight.Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	mPointLight.Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	mPointLight.Att = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	mPointLight.Range = 25.0f;
+
+	mSpotLight.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	mSpotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	mSpotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mSpotLight.Att = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	mSpotLight.Spot = 96.0f;
+	mSpotLight.Range = 10000.0f;
+
+	mLandMat.Ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+	mLandMat.Diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+	mLandMat.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+
+	mWavesMat.Ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
+	mWavesMat.Diffuse = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
+	mWavesMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
 }
 
 LitWavesDemo::~LitWavesDemo()
@@ -33,7 +60,8 @@ LitWavesDemo::~LitWavesDemo()
 	ReleaseCOM(mInputLayout);
 	ReleaseCOM(mVS);
 	ReleaseCOM(mPS);
-	ReleaseCOM(mMatrixBuffer);
+	ReleaseCOM(mPerObjectBuffer);
+	ReleaseCOM(mPerFrameBuffer);
 }
 
 bool LitWavesDemo::Init()
@@ -74,6 +102,8 @@ void LitWavesDemo::UpdateScene(float dt)
 	float z = mRadius*sinf(mPhi)*sinf(mTheta);
 	float y = mRadius*cosf(mPhi);
 
+	mEyePosW = XMFLOAT3(x, y, z);
+
 	// Build the view matrix.
 	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
 	XMVECTOR target = XMVectorZero();
@@ -106,10 +136,21 @@ void LitWavesDemo::UpdateScene(float dt)
 	for (UINT i = 0; i < mWaves.VertexCount(); ++i)
 	{
 		v[i].Pos = mWaves[i];
-		v[i].Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+		v[i].Normal = mWaves.Normal(i);
 	}
 
 	md3dImmediateContext->Unmap(mWavesVB, 0);
+
+
+	// Circle the light over the land surface
+	mPointLight.Position.x = 70.0f * cosf(0.2f * mTimer.TotalTime());
+	mPointLight.Position.z = 70.0f * sinf(0.2f * mTimer.TotalTime());
+	mPointLight.Position.y = MathHelper::Max(GetHeight(mPointLight.Position.x, mPointLight.Position.z), -3.0f) + 10.0f;
+
+	// The spotlight takes on the camera position and is aimed in the same direction the camera is looking.
+	// In this way, it looks like we are holding a flashlight.
+	mSpotLight.Position = mEyePosW;
+	XMStoreFloat3(&mSpotLight.Direction, XMVector3Normalize(target - pos));
 }
 
 void LitWavesDemo::DrawScene()
@@ -119,6 +160,20 @@ void LitWavesDemo::DrawScene()
 
 	md3dImmediateContext->IASetInputLayout(mInputLayout);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Set up Per Frame constants
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HR(md3dImmediateContext->Map(mPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	PerFrameBuffer* frameDataPtr = (PerFrameBuffer*)mappedResource.pData;
+	frameDataPtr->DirLight = mDirLight;
+	frameDataPtr->PLight = mPointLight;
+	frameDataPtr->SLight = mSpotLight;
+	frameDataPtr->EyePosW = mEyePosW;
+
+	md3dImmediateContext->Unmap(mPerFrameBuffer, 0);
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
+
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -134,14 +189,17 @@ void LitWavesDemo::DrawScene()
 	XMMATRIX world = XMLoadFloat4x4(&mGridWorld);
 	XMMATRIX worldViewProj = world * view * proj;
 
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HR(md3dImmediateContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	MatrixBuffer* dataPtr = (MatrixBuffer*)mappedResource.pData;
+	PerObjectBuffer* dataPtr = (PerObjectBuffer*)mappedResource.pData;
+	dataPtr->World = XMMatrixTranspose(world);
+	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	dataPtr->Mat = mLandMat;
 
-	md3dImmediateContext->Unmap(mMatrixBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 
 	md3dImmediateContext->RSSetState(0);
 
@@ -160,15 +218,17 @@ void LitWavesDemo::DrawScene()
 	worldViewProj = world * view * proj;
 
 	mappedResource;
-	HR(md3dImmediateContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	dataPtr = (MatrixBuffer*)mappedResource.pData;
+	dataPtr = (PerObjectBuffer*)mappedResource.pData;
+	dataPtr->World = XMMatrixTranspose(world);
+	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	dataPtr->Mat = mWavesMat;
 
-	md3dImmediateContext->Unmap(mMatrixBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
-
-	md3dImmediateContext->RSSetState(mWireframeRS);
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
@@ -228,6 +288,20 @@ float LitWavesDemo::GetHeight(float x, float z) const
 	return 0.3f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
 }
 
+XMFLOAT3 LitWavesDemo::GetHillNormal(float x, float z) const
+{
+	// n = (-df/dx, 1, -df/dz)
+	XMFLOAT3 n(
+		-0.03f * z * cosf(0.1f * x) - 0.3f * cosf(0.1f * z),
+		1,
+		-0.03f * sinf(0.1f * x) + 0.03f * x * sinf(0.1f * z));
+
+	XMVECTOR unitNormal = XMVector3Normalize(XMLoadFloat3(&n));
+	XMStoreFloat3(&n, unitNormal);
+
+	return n;
+}
+
 void LitWavesDemo::BuildLandGeometryBuffers()
 {
 	GeometryGenerator::MeshData grid;
@@ -236,7 +310,7 @@ void LitWavesDemo::BuildLandGeometryBuffers()
 
 	geoGen.CreateGrid(160.0f, 160.0f, 50, 50, grid);
 
-	mGridIndexCount = grid.Indices.size();
+	mGridIndexCount = (UINT)grid.Indices.size();
 
 	// Extract the vertex elements we are interested in and apply the height function to each vertex.
 	// In addition, color the vertices based on their height so we have sandy looking beaches,
@@ -249,33 +323,7 @@ void LitWavesDemo::BuildLandGeometryBuffers()
 		p.y = GetHeight(p.x, p.z);
 
 		vertices[i].Pos = p;
-
-		// Color the vertex based on its height
-		if (p.y < -10.0f)
-		{
-			// Sandy beach color
-			vertices[i].Color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
-		}
-		else if (p.y < 5.0f)
-		{
-			// Light yellow-green
-			vertices[i].Color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-		}
-		else if (p.y < 12.0f)
-		{
-			// Dark yellow-green
-			vertices[i].Color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
-		}
-		else if (p.y < 20.0f)
-		{
-			// Dark brown
-			vertices[i].Color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
-		}
-		else
-		{
-			// White snow
-			vertices[i].Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-		}
+		vertices[i].Normal = GetHillNormal(p.x, p.z);
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -291,7 +339,7 @@ void LitWavesDemo::BuildLandGeometryBuffers()
 	// Pack the indices of all the meshes into one index buffer
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * grid.Indices.size();
+	ibd.ByteWidth = sizeof(UINT) * (UINT)grid.Indices.size();
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
@@ -338,7 +386,7 @@ void LitWavesDemo::BuildWavesGeometryBuffers()
 
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * indices.size();
+	ibd.ByteWidth = sizeof(UINT) * (UINT)indices.size();
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
@@ -353,21 +401,31 @@ void LitWavesDemo::BuildFX()
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	CreateShader(&mVS, L"../../../Shaders/colorVS.hlsl", "main", &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, L"../../../Shaders/colorPS.hlsl", "main");
+	CreateShader(&mVS, L"../../../Shaders/BasicLighting.hlsl", "VS", &mInputLayout, vertexDesc, 2);
+	CreateShader(&mPS, L"../../../Shaders/BasicLighting.hlsl", "PS");
 
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBuffer);
+	matrixBufferDesc.ByteWidth = sizeof(PerObjectBuffer);
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 
-	HR(md3dDevice->CreateBuffer(&matrixBufferDesc, 0, &mMatrixBuffer));
+	HR(md3dDevice->CreateBuffer(&matrixBufferDesc, 0, &mPerObjectBuffer));
+
+	D3D11_BUFFER_DESC matrixBufferDesc2;
+	matrixBufferDesc2.ByteWidth = sizeof(PerFrameBuffer);
+	matrixBufferDesc2.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc2.MiscFlags = 0;
+	matrixBufferDesc2.StructureByteStride = 0;
+
+	HR(md3dDevice->CreateBuffer(&matrixBufferDesc2, 0, &mPerFrameBuffer));
 }
