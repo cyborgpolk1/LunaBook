@@ -54,7 +54,7 @@ private:
 	ID3D11Buffer* mShapesVB;
 	ID3D11Buffer* mShapesIB;
 	ID3D11VertexShader* mVS;
-	ID3D11PixelShader* mPS;
+	ID3D11PixelShader* mPS[4];
 
 	ID3D11Buffer* mPerFrameBuffer;
 	ID3D11Buffer* mPerObjectBuffer;
@@ -95,6 +95,8 @@ private:
 	Material mCylinderMat;
 	Material mSphereMat;
 	Material mSkullMat;
+
+	int mLightCount;
 
 	float mTheta;
 	float mPhi;

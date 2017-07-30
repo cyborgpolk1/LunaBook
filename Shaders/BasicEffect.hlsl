@@ -1,6 +1,9 @@
 #include "LightHelper.hlsl"
 
-#define NumLights 3
+// Macros that can be redefined by the CPU need to be in guards to prevent redefinition
+#ifndef NUM_LIGHTS
+#define NUM_LIGHTS 3
+#endif
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -85,7 +88,7 @@ float4 PS(VertexOut pin) : SV_Target
 
     // Sum the light contribution from each light source.
     [unroll]
-    for (int i = 0; i < NumLights; ++i)
+    for (int i = 0; i < NUM_LIGHTS; ++i)
     {
         float4 A, D, S;
         ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye, A, D, S);

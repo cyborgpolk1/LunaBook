@@ -9,16 +9,19 @@
 D3DMAIN(LitSkullDemo);
 
 LitSkullDemo::LitSkullDemo(HINSTANCE hInstance)
-	: D3DApp(hInstance), mShapesVB(0), mShapesIB(0), mInputLayout(0), mVS(0), mPS(0), mPerObjectBuffer(0), mPerFrameBuffer(0),
+	: D3DApp(hInstance), mShapesVB(0), mShapesIB(0), mInputLayout(0), mVS(0), mPerObjectBuffer(0), mPerFrameBuffer(0),
 	mBoxVertexOffset(0), mGridVertexOffset(0), mSphereVertexOffset(0), mCylinderVertexOffset(0), mSkullVertexOffset(0),
 	mBoxIndexCount(0), mGridIndexCount(0), mSphereIndexCount(0), mCylinderIndexCount(0), mSkullIndexCount(0),
 	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0), mSkullIndexOffset(0),
-	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(15.0f)
+	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(15.0f), mLightCount(0)
 {
 	mMainWndCaption = L"Lit Skull Demo";
 
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
+
+	for (int i = 0; i < 4; ++i)
+		mPS[i] = 0;
 
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mView, I);
@@ -86,7 +89,8 @@ LitSkullDemo::~LitSkullDemo()
 	ReleaseCOM(mShapesIB);
 	ReleaseCOM(mInputLayout);
 	ReleaseCOM(mVS);
-	ReleaseCOM(mPS);
+	for (int i = 0; i < 4; ++i)
+		ReleaseCOM(mPS[i]);
 	ReleaseCOM(mPerFrameBuffer);
 	ReleaseCOM(mPerObjectBuffer);
 }
@@ -124,6 +128,18 @@ void LitSkullDemo::UpdateScene(float dt)
 
 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, V);
+
+	if (GetAsyncKeyState('0') & 0x8000)
+		mLightCount = 0;
+
+	if (GetAsyncKeyState('1') & 0x8000)
+		mLightCount = 1;
+
+	if (GetAsyncKeyState('2') & 0x8000)
+		mLightCount = 2;
+
+	if (GetAsyncKeyState('3') & 0x8000)
+		mLightCount = 3;
 }
 
 void LitSkullDemo::DrawScene()
@@ -140,7 +156,7 @@ void LitSkullDemo::DrawScene()
 	md3dImmediateContext->IASetIndexBuffer(mShapesIB, DXGI_FORMAT_R32_UINT, 0);
 
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mPS, 0, 0);
+	md3dImmediateContext->PSSetShader(mPS[mLightCount], 0, 0);
 
 	XMMATRIX view = XMLoadFloat4x4(&mView);
 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
@@ -419,9 +435,19 @@ void LitSkullDemo::BuildFX()
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	CreateShader(&mVS, L"../../../Shaders/BasicEffect.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, L"../../../Shaders/BasicEffect.hlsl", "PS", 0);
+	D3D_SHADER_MACRO basicEffectDefines[] = {
+		{"NUM_LIGHTS", "0"},
+		{0, 0}
+	};
 
+	CreateShader(&mVS, L"../../../Shaders/BasicEffect.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		std::string lightMacro = std::to_string(i);
+		basicEffectDefines[0] = { "NUM_LIGHTS", lightMacro.c_str() };
+		CreateShader(&mPS[i], L"../../../Shaders/BasicEffect.hlsl", "PS", basicEffectDefines);
+	}
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	matrixBufferDesc.ByteWidth = sizeof(PerObjectBuffer);
