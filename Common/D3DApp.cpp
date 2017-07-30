@@ -546,7 +546,10 @@ ID3DBlob* D3DApp::CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR target, c
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
 	{
-		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
+		wchar_t* error = new wchar_t[compilationMsgs->GetBufferSize()+1];
+		size_t out;
+		mbstowcs_s(&out, error, compilationMsgs->GetBufferSize() + 1, (const char*)compilationMsgs->GetBufferPointer(), compilationMsgs->GetBufferSize());
+		MessageBox(0, error, 0, 0);
 	}
 
 	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
