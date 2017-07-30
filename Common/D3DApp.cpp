@@ -530,7 +530,7 @@ void D3DApp::CalculateFrameStats()
 	}
 }
 
-void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC* vertexDesc, UINT vertexDescSize)
+ID3DBlob* D3DApp::CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR target, const D3D_SHADER_MACRO* defines)
 {
 	DWORD shaderFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -538,16 +538,15 @@ void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR 
 	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
 #endif
 
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
+	ID3DBlob* compiledShader = 0;
+	ID3DBlob* compilationMsgs = 0;
 
-	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "vs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
+	HRESULT hr = D3DCompileFromFile(filename, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, target, shaderFlags, 0, &compiledShader, &compilationMsgs);
 
 	// compilationMsgs can store errors or warnings.
 	if (compilationMsgs != 0)
 	{
 		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
-		ReleaseCOM(compilationMsgs);
 	}
 
 	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
@@ -555,171 +554,64 @@ void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR 
 	{
 		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
 	}
+
+	ReleaseCOM(compilationMsgs);
+
+	return compiledShader;
+}
+
+void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC* vertexDesc, UINT vertexDescSize)
+{
+	ID3DBlob* compiledShader = CompileShader(filename, entry, "vs_5_0", defines);
 
 	HR(md3dDevice->CreateVertexShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
 
 	HR(md3dDevice->CreateInputLayout(vertexDesc, vertexDescSize, compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), inputLayout));
 
 	ReleaseCOM(compiledShader);
-	ReleaseCOM(compilationMsgs);
 }
 
-void D3DApp::CreateShader(ID3D11PixelShader** shader, LPCWSTR filename, LPCSTR entry)
+void D3DApp::CreateShader(ID3D11PixelShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-
-	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "ps_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
-
-	// compilationMsgs can store errors or warnings.
-	if (compilationMsgs != 0)
-	{
-		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
-		ReleaseCOM(compilationMsgs);
-	}
-
-	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
-	if (FAILED(hr))
-	{
-		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
-	}
+	ID3DBlob* compiledShader = CompileShader(filename, entry, "ps_5_0", defines);
 
 	HR(md3dDevice->CreatePixelShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
 
 	ReleaseCOM(compiledShader);
-	ReleaseCOM(compilationMsgs);
 }
 
-void D3DApp::CreateShader(ID3D11GeometryShader** shader, LPCWSTR filename, LPCSTR entry)
+void D3DApp::CreateShader(ID3D11GeometryShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-
-	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "gs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
-
-	// compilationMsgs can store errors or warnings.
-	if (compilationMsgs != 0)
-	{
-		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
-		ReleaseCOM(compilationMsgs);
-	}
-
-	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
-	if (FAILED(hr))
-	{
-		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
-	}
+	ID3D10Blob* compiledShader = CompileShader(filename, entry, "gs_5_0", defines);
 
 	HR(md3dDevice->CreateGeometryShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
 
 	ReleaseCOM(compiledShader);
-	ReleaseCOM(compilationMsgs);
 }
 
-void D3DApp::CreateShader(ID3D11HullShader** shader, LPCWSTR filename, LPCSTR entry)
+void D3DApp::CreateShader(ID3D11HullShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-
-	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "hs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
-
-	// compilationMsgs can store errors or warnings.
-	if (compilationMsgs != 0)
-	{
-		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
-		ReleaseCOM(compilationMsgs);
-	}
-
-	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
-	if (FAILED(hr))
-	{
-		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
-	}
+	ID3D10Blob* compiledShader = CompileShader(filename, entry, "hs_5_0", defines);
 
 	HR(md3dDevice->CreateHullShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
 
 	ReleaseCOM(compiledShader);
-	ReleaseCOM(compilationMsgs);
 }
 
-void D3DApp::CreateShader(ID3D11DomainShader** shader, LPCWSTR filename, LPCSTR entry)
+void D3DApp::CreateShader(ID3D11DomainShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-
-	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "ds_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
-
-	// compilationMsgs can store errors or warnings.
-	if (compilationMsgs != 0)
-	{
-		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
-		ReleaseCOM(compilationMsgs);
-	}
-
-	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
-	if (FAILED(hr))
-	{
-		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
-	}
+	ID3D10Blob* compiledShader = CompileShader(filename, entry, "ds_5_0", defines);
 
 	HR(md3dDevice->CreateDomainShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
 
 	ReleaseCOM(compiledShader);
-	ReleaseCOM(compilationMsgs);
 }
 
-void D3DApp::CreateShader(ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR entry)
+void D3DApp::CreateShader(ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-
-	HRESULT hr = D3DCompileFromFile(filename, 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, "cs_5_0", shaderFlags, 0, &compiledShader, &compilationMsgs);
-
-	// compilationMsgs can store errors or warnings.
-	if (compilationMsgs != 0)
-	{
-		MessageBox(0, (LPCWSTR)compilationMsgs->GetBufferPointer(), 0, 0);
-		ReleaseCOM(compilationMsgs);
-	}
-
-	// Even if there are no compilationsMsgs, check to make sure there were no other errors.
-	if (FAILED(hr))
-	{
-		DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
-	}
+	ID3D10Blob* compiledShader = CompileShader(filename, entry, "cs_5_0", defines);
 
 	HR(md3dDevice->CreateComputeShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
 
 	ReleaseCOM(compiledShader);
-	ReleaseCOM(compilationMsgs);
 }
