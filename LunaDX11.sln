@@ -127,6 +127,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\colorVS.hlsl = Shaders\colorVS.hlsl
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
 		Shaders\LightHelper.hlsl = Shaders\LightHelper.hlsl
+		Shaders\ToonLighting.hlsl = Shaders\ToonLighting.hlsl
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoxMod", "Source\BoxMod\BoxMod.vcxproj", "{EFA3114F-8B46-4276-AA5C-84E197233058}"
@@ -153,6 +154,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LitSkull", "Source\LitSkull
 	ProjectSection(ProjectDependencies) = postProject
 		{F8363D07-7118-47A0-B6E9-87EF65D33485} = {F8363D07-7118-47A0-B6E9-87EF65D33485}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LitWavesMod", "Source\LitWavesMod\LitWavesMod.vcxproj", "{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToonWaves", "Source\ToonWaves\ToonWaves.vcxproj", "{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -314,6 +319,22 @@ Global
 		{9FAB595A-7496-4FD2-A95E-B7539ECC913A}.Release|x64.Build.0 = Release|x64
 		{9FAB595A-7496-4FD2-A95E-B7539ECC913A}.Release|x86.ActiveCfg = Release|Win32
 		{9FAB595A-7496-4FD2-A95E-B7539ECC913A}.Release|x86.Build.0 = Release|Win32
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Debug|x64.ActiveCfg = Debug|x64
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Debug|x64.Build.0 = Debug|x64
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Debug|x86.ActiveCfg = Debug|Win32
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Debug|x86.Build.0 = Debug|Win32
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Release|x64.ActiveCfg = Release|x64
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Release|x64.Build.0 = Release|x64
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Release|x86.ActiveCfg = Release|Win32
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A}.Release|x86.Build.0 = Release|Win32
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Debug|x64.ActiveCfg = Debug|x64
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Debug|x64.Build.0 = Debug|x64
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Debug|x86.ActiveCfg = Debug|Win32
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Debug|x86.Build.0 = Debug|Win32
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Release|x64.ActiveCfg = Release|x64
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Release|x64.Build.0 = Release|x64
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Release|x86.ActiveCfg = Release|Win32
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -337,5 +358,7 @@ Global
 		{861A58F5-ED44-4AD3-9736-6F11B7AACECD} = {FE7821E7-9C3A-4553-9BAC-81197B88600F}
 		{FFEB658B-740E-426C-99B1-43363B57ED04} = {8606500B-6728-465A-A6D0-A810D4200572}
 		{9FAB595A-7496-4FD2-A95E-B7539ECC913A} = {8606500B-6728-465A-A6D0-A810D4200572}
+		{9134D5EE-DFF4-4B37-B8C1-13DD025E310A} = {8606500B-6728-465A-A6D0-A810D4200572}
+		{ACC780A9-EF0E-4CD3-AF77-95DF775E23E3} = {8606500B-6728-465A-A6D0-A810D4200572}
 	EndGlobalSection
 EndGlobal
