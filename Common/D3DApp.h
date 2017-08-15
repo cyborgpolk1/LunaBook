@@ -7,6 +7,7 @@
 
 #include "GameTimer.h"
 #include "d3dUtil.h"
+#include "CommonLibs.h"
 
 class D3DApp
 {
