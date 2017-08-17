@@ -1,5 +1,6 @@
 #include "Crate.h"
 #include <d3dcompiler.h>
+#include <vector>
 
 D3DMAIN(CrateApp);
 
@@ -48,9 +49,56 @@ void CrateApp::OnResize()
 	XMStoreFloat4x4(&mProj, P);
 }
 
-void CrateApp::UpdateScene(float dt) {}
+void CrateApp::UpdateScene(float dt) 
+{
+	// Convert Spherical to Cartesian coordinate
+	float x = mRadius * sinf(mPhi) * cosf(mTheta);
+	float z = mRadius * sinf(mPhi) * sinf(mTheta);
+	float y = mRadius * cosf(mPhi);
 
-void CrateApp::DrawScene() {}
+	// Build the view matrix
+	XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+	XMVECTOR target = XMVectorZero();
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
+	XMStoreFloat4x4(&mView, V);
+}
+
+void CrateApp::DrawScene() 
+{
+	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::LightSteelBlue));
+	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	md3dImmediateContext->IASetInputLayout(mInputLayout);
+	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mVB, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
+
+	md3dImmediateContext->VSSetShader(mVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mPS, 0, 0);
+
+	XMMATRIX view = XMLoadFloat4x4(&mView);
+	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+	XMMATRIX world = XMLoadFloat4x4(&mWorld);
+	XMMATRIX worldViewProj = world*view*proj;
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HR(md3dImmediateContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	
+	MatrixBuffer* dataPtr = (MatrixBuffer*)mappedResource.pData;
+	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+
+	md3dImmediateContext->Unmap(mMatrixBuffer, 0);
+	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
+
+	md3dImmediateContext->DrawIndexed(mIndexCount, 0, 0);
+
+	HR(mSwapChain->Present(0, 0));;
+}
 
 void CrateApp::OnMouseDown(WPARAM btnState, int x, int y) 
 {
@@ -97,6 +145,66 @@ void CrateApp::OnMouseMove(WPARAM btnState, int x, int y)
 	mLastMousePoint.y = y;
 }
 
-void CrateApp::BuildGeometryBuffers() {}
+void CrateApp::BuildGeometryBuffers() 
+{
+	GeometryGenerator::MeshData box;
+	GeometryGenerator geoGen;
+	geoGen.CreateBox(2.0f, 2.0f, 2.0f, box);
 
-void CrateApp::BuildFX() {}
+	std::vector<Vertex> vertices(box.Vertices.size());
+
+	for (UINT i = 0; i < box.Vertices.size(); ++i)
+	{
+		vertices[i].Pos = box.Vertices[i].Position;
+		vertices[i].Tex = box.Vertices[i].TexC;
+	}
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(Vertex) * vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mVB));
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT) * box.Indices.size();
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+
+	mIndexCount = box.Indices.size();
+
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = &(box.Indices[0]);
+	HR(md3dDevice->CreateBuffer(&ibd, &initData, &mIB));
+}
+
+void CrateApp::BuildFX() 
+{
+	D3D11_INPUT_ELEMENT_DESC vertexDesc[] = 
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	CreateShader(&mVS, L"../../../Shaders/BasicTexture.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
+	CreateShader(&mPS, L"../../../Shaders/BasicTexture.hlsl", "PS", 0);
+
+	// Create matrix buffer
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBuffer);
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	HR(md3dDevice->CreateBuffer(&matrixBufferDesc, 0, &mMatrixBuffer));
+}

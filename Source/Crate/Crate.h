@@ -2,6 +2,7 @@
 
 #include "D3DApp.h"
 #include "MathHelper.h"
+#include "GeometryGenerator.h"
 
 struct Vertex
 {
@@ -39,6 +40,8 @@ private:
 	ID3D11VertexShader* mVS;
 	ID3D11PixelShader* mPS;
 	ID3D11Buffer* mMatrixBuffer;
+
+	UINT mIndexCount;
 
 	ID3D11InputLayout* mInputLayout;
 
