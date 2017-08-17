@@ -3,6 +3,7 @@
 #include "D3DApp.h"
 #include "MathHelper.h"
 #include "GeometryGenerator.h"
+#include "DDSTextureLoader.h"
 
 struct Vertex
 {
@@ -33,6 +34,7 @@ public:
 private:
 	void BuildGeometryBuffers();
 	void BuildFX();
+	void BuildTex();
 
 private:
 	ID3D11Buffer* mVB;
@@ -44,6 +46,9 @@ private:
 	UINT mIndexCount;
 
 	ID3D11InputLayout* mInputLayout;
+
+	ID3D11ShaderResourceView* mTexture;
+	ID3D11SamplerState* mSampleState;
 
 	XMFLOAT4X4 mWorld;
 	XMFLOAT4X4 mView;

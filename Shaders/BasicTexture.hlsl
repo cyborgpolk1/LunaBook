@@ -15,6 +15,9 @@ struct VertexOut
     float2 TexC : TEXCOORD;
 };
 
+Texture2D gTex;
+SamplerState gSample;
+
 VertexOut VS(VertexIn vin)
 {
     VertexOut vout;
@@ -28,5 +31,5 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    return float4(pin.TexC, 0.0f, 1.0f);
+    return gTex.Sample(gSample, pin.TexC);
 }

@@ -36,6 +36,7 @@ bool CrateApp::Init()
 
 	BuildGeometryBuffers();
 	BuildFX();
+	BuildTex();
 
 	return true; 
 }
@@ -94,6 +95,9 @@ void CrateApp::DrawScene()
 
 	md3dImmediateContext->Unmap(mMatrixBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
+
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mTexture);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
 	md3dImmediateContext->DrawIndexed(mIndexCount, 0, 0);
 
@@ -207,4 +211,17 @@ void CrateApp::BuildFX()
 	matrixBufferDesc.StructureByteStride = 0;
 
 	HR(md3dDevice->CreateBuffer(&matrixBufferDesc, 0, &mMatrixBuffer));
+}
+
+void CrateApp::BuildTex()
+{
+	ID3D11Resource* textureResource;
+	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/WoodCrate01.dds", &textureResource, &mTexture));
+
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+
+	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState));
 }
