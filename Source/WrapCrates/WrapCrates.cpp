@@ -6,7 +6,7 @@ D3DMAIN(WrapCratesApp);
 
 WrapCratesApp::WrapCratesApp(HINSTANCE hInstance)
 	: D3DApp(hInstance), mVB(0), mIB(0), mInputLayout(0), mVS(0), mPS(0), mMatrixBuffer(0),
-	mTexture(0), mSampleState(), mViewPorts(),
+	 mViewPorts(),
 	mTheta(1.5f*MathHelper::Pi), mPhi(0.25f*MathHelper::Pi), mRadius(5.0f)
 {
 	mMainWndCaption = L"Crate Demo";
@@ -34,6 +34,13 @@ WrapCratesApp::~WrapCratesApp()
 	ReleaseCOM(mVS);
 	ReleaseCOM(mPS);
 	ReleaseCOM(mMatrixBuffer);
+	ReleaseCOM(mTexture);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		delete mViewPorts[i];
+		ReleaseCOM(mSampleState[i]);
+	}
 }
 
 bool WrapCratesApp::Init()
@@ -108,11 +115,11 @@ void WrapCratesApp::DrawScene()
 
 	for (int i = 0; i < 4; ++i)
 	{
-		md3dImmediateContext->RSSetViewports(0, mViewPorts[i]);
+		md3dImmediateContext->RSSetViewports(1, mViewPorts[i]);
 		md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState[i]);
 		md3dImmediateContext->DrawIndexed(mIndexCount, 0, 0);
 	}
-
+	
 	
 	HR(mSwapChain->Present(0, 0));;
 }
@@ -173,7 +180,8 @@ void WrapCratesApp::BuildGeometryBuffers()
 	for (UINT i = 0; i < box.Vertices.size(); ++i)
 	{
 		vertices[i].Pos = box.Vertices[i].Position;
-		vertices[i].Tex = box.Vertices[i].TexC;
+		vertices[i].Tex.x = 3.0f * box.Vertices[i].TexC.x - 0.5f;
+		vertices[i].Tex.y = 3.0f * box.Vertices[i].TexC.y - 0.5f;
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -235,9 +243,19 @@ void WrapCratesApp::BuildTex()
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState[0]));
 
-	/*samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState[1]));
 
@@ -251,7 +269,9 @@ void WrapCratesApp::BuildTex()
 
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
-	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState[3]));*/
+	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState[3]));
+
+	ReleaseCOM(textureResource);
 }
 
 void WrapCratesApp::BuildViewports()
