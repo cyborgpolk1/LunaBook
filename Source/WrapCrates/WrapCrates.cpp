@@ -219,8 +219,11 @@ void WrapCratesApp::BuildFX()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	CreateShader(&mVS, L"../../../Shaders/BasicTexture.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, L"../../../Shaders/BasicTexture.hlsl", "PS", 0);
+	//CreateShader(&mVS, L"../../../Shaders/BasicTexture.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
+	//CreateShader(&mPS, L"../../../Shaders/BasicTexture.hlsl", "PS", 0);
+
+	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
+	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "PS", 0);
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;
@@ -237,7 +240,7 @@ void WrapCratesApp::BuildFX()
 void WrapCratesApp::BuildTex()
 {
 	ID3D11Resource* textureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/WoodCrate01.dds", &textureResource, &mTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/WoodCrate01.dds").c_str(), &textureResource, &mTexture));
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

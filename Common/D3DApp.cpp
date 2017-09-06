@@ -618,3 +618,10 @@ void D3DApp::CreateShader(ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR
 
 	ReleaseCOM(compiledShader);
 }
+
+std::wstring D3DApp::ExePath() {
+	wchar_t buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+	return std::wstring(buffer).substr(0, pos+1);
+}

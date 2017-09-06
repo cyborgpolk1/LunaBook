@@ -48,6 +48,7 @@ protected:
 	void CreateShader(ID3D11HullShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
 	void CreateShader(ID3D11DomainShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
 	void CreateShader(ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
+	std::wstring ExePath();
 
 protected:
 	HINSTANCE	mhAppInst;	// application instance handle
