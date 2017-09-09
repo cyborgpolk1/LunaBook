@@ -281,8 +281,8 @@ void BoxApp::BuildFX()
 	};
 
 
-	CreateShader(&mVS, L"../../../Shaders/flubberCubeVS.hlsl", "main", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, L"../../../Shaders/colorPS.hlsl", "main", 0);
+	CreateShader(&mVS, ExePath().append(L"../../../Shaders/flubberCubeVS.hlsl").c_str(), "main", 0, &mInputLayout, vertexDesc, 2);
+	CreateShader(&mPS, ExePath().append(L"../../../Shaders/colorPS.hlsl").c_str(), "main", 0);
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;

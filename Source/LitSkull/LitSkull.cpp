@@ -301,7 +301,7 @@ void LitSkullDemo::BuildGeometryBuffer()
 	geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20, cylinder);
 
 	// Load skull
-	std::ifstream fin("../../../Models/skull.txt");
+	std::ifstream fin(ExePath().append(L"../../../Models/skull.txt").c_str());
 
 	if (!fin)
 	{
@@ -440,13 +440,13 @@ void LitSkullDemo::BuildFX()
 		{0, 0}
 	};
 
-	CreateShader(&mVS, L"../../../Shaders/BasicEffect.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
+	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
 
 	for (int i = 0; i < 4; ++i)
 	{
 		std::string lightMacro = std::to_string(i);
 		basicEffectDefines[0] = { "NUM_LIGHTS", lightMacro.c_str() };
-		CreateShader(&mPS[i], L"../../../Shaders/BasicEffect.hlsl", "PS", basicEffectDefines);
+		CreateShader(&mPS[i], ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", basicEffectDefines);
 	}
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
