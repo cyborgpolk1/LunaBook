@@ -404,8 +404,8 @@ void LitWavesDemo::BuildFX()
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	CreateShader(&mVS, L"../../../Shaders/BasicLighting.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, L"../../../Shaders/BasicLighting.hlsl", "PS", 0);
+	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicLighting.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
+	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicLighting.hlsl").c_str(), "PS", 0);
 
 
 	// Create matrix buffer
