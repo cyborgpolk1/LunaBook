@@ -27,13 +27,6 @@ cbuffer cbPerObject : register(b1)
 Texture2D gDiffuseMap;
 
 SamplerState samAnisotropic;
-/*{
-    Filter = ANISOTROPIC;
-    MaxAnisotropy = 4;
-
-    AddressU = WRAP;
-    AddressV = WRAP;
-};*/
 
 struct VertexIn
 {
