@@ -272,7 +272,7 @@ void FilterCratesApp::BuildTex()
 
 void FilterCratesApp::BuildViewports()
 {
-	D3D11_VIEWPORT a, b, c, d;
+	D3D11_VIEWPORT a, b, c;
 
 	a.TopLeftX = 0.0f;
 	a.TopLeftY = 0.0f;
