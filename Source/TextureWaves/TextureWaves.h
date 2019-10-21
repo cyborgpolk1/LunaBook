@@ -4,6 +4,7 @@
 #include "D3DApp.h"
 #include "Waves.h"
 #include "LightHelper.h"
+#include "DDSTextureLoader.h"
 
 struct Vertex
 {
@@ -49,6 +50,7 @@ private:
 	void BuildLandGeometryBuffers();
 	void BuildWavesGeometryBuffers();
 	void BuildFX();
+	void BuildTex();
 
 private:
 	ID3D11Buffer* mLandVB;
@@ -64,6 +66,9 @@ private:
 	ID3D11InputLayout* mInputLayout;
 
 	ID3D11RasterizerState* mWireframeRS;
+
+	ID3D11ShaderResourceView* mTexture;
+	ID3D11SamplerState* mSampleState;
 
 	XMFLOAT4X4 mGridWorld;
 	XMFLOAT4X4 mWavesWorld;
