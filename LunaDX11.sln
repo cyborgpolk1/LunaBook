@@ -129,6 +129,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\colorVS.hlsl = Shaders\colorVS.hlsl
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
 		Shaders\LightHelper.hlsl = Shaders\LightHelper.hlsl
+		Shaders\Multitexture.hlsl = Shaders\Multitexture.hlsl
 		Shaders\ToonLighting.hlsl = Shaders\ToonLighting.hlsl
 	EndProjectSection
 EndProject
@@ -173,6 +174,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TextureWaves", "Source\TextureWaves\TextureWaves.vcxproj", "{EFD6EA3C-8C60-4740-80A5-FE8D45238B1B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MipmapCrate", "Source\MipmapCrate\MipmapCrate.vcxproj", "{8C5479ED-9352-4A18-B3F9-539F70AC4586}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FireballCrate", "FireballCrate\FireballCrate.vcxproj", "{C220AF15-E897-4D44-B038-4C98504BF424}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -390,6 +393,14 @@ Global
 		{8C5479ED-9352-4A18-B3F9-539F70AC4586}.Release|x64.Build.0 = Release|x64
 		{8C5479ED-9352-4A18-B3F9-539F70AC4586}.Release|x86.ActiveCfg = Release|Win32
 		{8C5479ED-9352-4A18-B3F9-539F70AC4586}.Release|x86.Build.0 = Release|Win32
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Debug|x64.ActiveCfg = Debug|x64
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Debug|x64.Build.0 = Debug|x64
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Debug|x86.ActiveCfg = Debug|Win32
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Debug|x86.Build.0 = Debug|Win32
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Release|x64.ActiveCfg = Release|x64
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Release|x64.Build.0 = Release|x64
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Release|x86.ActiveCfg = Release|Win32
+		{C220AF15-E897-4D44-B038-4C98504BF424}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -420,5 +431,6 @@ Global
 		{660D82F6-C24E-4A33-ABE6-02BA754E16F4} = {0AE2623E-D086-4184-8938-C5EFED1EF0F3}
 		{EFD6EA3C-8C60-4740-80A5-FE8D45238B1B} = {0AE2623E-D086-4184-8938-C5EFED1EF0F3}
 		{8C5479ED-9352-4A18-B3F9-539F70AC4586} = {0AE2623E-D086-4184-8938-C5EFED1EF0F3}
+		{C220AF15-E897-4D44-B038-4C98504BF424} = {0AE2623E-D086-4184-8938-C5EFED1EF0F3}
 	EndGlobalSection
 EndGlobal
