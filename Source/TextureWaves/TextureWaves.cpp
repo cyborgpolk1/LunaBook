@@ -62,6 +62,8 @@ TextureWavesApp::~TextureWavesApp()
 	ReleaseCOM(mPS);
 	ReleaseCOM(mPerObjectBuffer);
 	ReleaseCOM(mPerFrameBuffer);
+	ReleaseCOM(mTexture);
+	ReleaseCOM(mSampleState);
 }
 
 bool TextureWavesApp::Init()
@@ -74,6 +76,7 @@ bool TextureWavesApp::Init()
 	BuildLandGeometryBuffers();
 	BuildWavesGeometryBuffers();
 	BuildFX();
+	BuildTex();;
 
 	D3D11_RASTERIZER_DESC wireframeDesc;
 	ZeroMemory(&wireframeDesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -195,11 +198,15 @@ void TextureWavesApp::DrawScene()
 	dataPtr->World = XMMatrixTranspose(world);
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	dataPtr->TextureTransform = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	dataPtr->Mat = mLandMat;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mTexture);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
 	md3dImmediateContext->RSSetState(0);
 
@@ -210,30 +217,33 @@ void TextureWavesApp::DrawScene()
 
 
 	// WATER
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
-	md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
+	//md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
+	//md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
 
-	// Set constants
-	world = XMLoadFloat4x4(&mWavesWorld);
-	worldViewProj = world * view * proj;
+	//// Set constants
+	//world = XMLoadFloat4x4(&mWavesWorld);
+	//worldViewProj = world * view * proj;
 
-	mappedResource;
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	//mappedResource;
+	//HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	dataPtr = (PerObjectBuffer*)mappedResource.pData;
-	dataPtr->World = XMMatrixTranspose(world);
-	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
-	dataPtr->Mat = mWavesMat;
+	//dataPtr = (PerObjectBuffer*)mappedResource.pData;
+	//dataPtr->World = XMMatrixTranspose(world);
+	//dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	//dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	//dataPtr->Mat = mWavesMat;
 
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	//md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+	//md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	//md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 
-	md3dImmediateContext->VSSetShader(mVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mPS, 0, 0);
+	//md3dImmediateContext->PSSetShaderResources(0, 1, &mTexture);
+	//md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
-	md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
+	//md3dImmediateContext->VSSetShader(mVS, 0, 0);
+	//md3dImmediateContext->PSSetShader(mPS, 0, 0);
+
+	//md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -324,6 +334,7 @@ void TextureWavesApp::BuildLandGeometryBuffers()
 
 		vertices[i].Pos = p;
 		vertices[i].Normal = GetHillNormal(p.x, p.z);
+		vertices[i].Tex = grid.Vertices[i].TexC;
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -401,11 +412,12 @@ void TextureWavesApp::BuildFX()
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicLighting.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicLighting.hlsl").c_str(), "PS", 0);
+	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicTextureAndLighting.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 3);
+	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicTextureAndLighting.hlsl").c_str(), "PS", 0);
 
 
 	// Create matrix buffer
@@ -428,4 +440,29 @@ void TextureWavesApp::BuildFX()
 	matrixBufferDesc2.StructureByteStride = 0;
 
 	HR(md3dDevice->CreateBuffer(&matrixBufferDesc2, 0, &mPerFrameBuffer));
+}
+
+void TextureWavesApp::BuildTex()
+{
+	ID3D11Resource* textureResource;
+	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/grass.dds", &textureResource, &mTexture));
+
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState));
+
+	ReleaseCOM(textureResource);
 }

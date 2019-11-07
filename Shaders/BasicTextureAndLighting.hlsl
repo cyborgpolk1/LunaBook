@@ -14,6 +14,7 @@ cbuffer cbPerObject : register(b1)
     float4x4 gWorld;
     float4x4 gWorldInvTranspose;
     float4x4 gWorldViewProj;
+    float4x4 gTexTransform;
     Material gMaterial;
 };
 
@@ -32,8 +33,8 @@ struct VertexOut
     float2 TexC : TEXCOORD;
 };
 
-Texture2D gTex;
-SamplerState gSample;
+Texture2D gTex : register(t0);
+SamplerState gSample : register(s0);
 
 VertexOut VS(VertexIn vin)
 {
@@ -46,7 +47,7 @@ VertexOut VS(VertexIn vin)
     // Transform to homogenous clip space.
     vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 
-    vout.TexC = vin.TexC;
+    vout.TexC = mul(vin.TexC, (float2x2) gTexTransform);
 
     return vout;
 }

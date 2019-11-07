@@ -10,6 +10,7 @@ struct Vertex
 {
 	XMFLOAT3 Pos;
 	XMFLOAT3 Normal;
+	XMFLOAT2 Tex;
 };
 
 struct PerObjectBuffer
@@ -17,6 +18,7 @@ struct PerObjectBuffer
 	XMMATRIX World;
 	XMMATRIX WorldInvTranspose;
 	XMMATRIX WorldViewProj;
+	XMMATRIX TextureTransform;
 	Material Mat;
 };
 
