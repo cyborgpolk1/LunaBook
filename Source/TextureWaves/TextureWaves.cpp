@@ -10,7 +10,7 @@ D3DMAIN(TextureWavesApp);
 TextureWavesApp::TextureWavesApp(HINSTANCE hInstance)
 	: D3DApp(hInstance), mLandVB(0), mLandIB(0), mWavesVB(0), mWavesIB(0), mVS(0), mPS(0),
 	mPerObjectBuffer(0), mPerFrameBuffer(0), mInputLayout(0), mWireframeRS(0), mGridIndexCount(0),
-	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(200.0f),
+	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(200.0f), mWaterTexOffset(0.0f, 0.0f),
 	mEyePosW(0.0f, 0.0f, 0.0f)
 {
 	mMainWndCaption = L"Lit Waves Demo";
@@ -131,6 +131,16 @@ void TextureWavesApp::UpdateScene(float dt)
 
 	mWaves.Update(dt);
 
+	// Water texture transform
+	XMMATRIX wavesScale = XMMatrixScaling(5.0f, 5.0f, 0.0f);
+
+	mWaterTexOffset.y += 0.05f * dt;
+	mWaterTexOffset.x += 0.1f * dt;
+	XMMATRIX wavesOffset = XMMatrixTranslation(mWaterTexOffset.x, mWaterTexOffset.y, 0.0f);
+
+	XMStoreFloat4x4(&mWaterTexTransform, wavesScale*wavesOffset);
+
+
 	// Update the wave vertex buffer with the new solution
 	D3D11_MAPPED_SUBRESOURCE mappedData;
 	HR(md3dImmediateContext->Map(mWavesVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
@@ -140,6 +150,8 @@ void TextureWavesApp::UpdateScene(float dt)
 	{
 		v[i].Pos = mWaves[i];
 		v[i].Normal = mWaves.Normal(i);
+		v[i].Tex.x = 0.5f + mWaves[i].x / mWaves.Width();
+		v[i].Tex.y = 0.5f - mWaves[i].z / mWaves.Depth();
 	}
 
 	md3dImmediateContext->Unmap(mWavesVB, 0);
@@ -217,33 +229,34 @@ void TextureWavesApp::DrawScene()
 
 
 	// WATER
-	//md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
-	//md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
 
-	//// Set constants
-	//world = XMLoadFloat4x4(&mWavesWorld);
-	//worldViewProj = world * view * proj;
+	// Set constants
+	world = XMLoadFloat4x4(&mWavesWorld);
+	worldViewProj = world * view * proj;
 
-	//mappedResource;
-	//HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	mappedResource;
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	//dataPtr = (PerObjectBuffer*)mappedResource.pData;
-	//dataPtr->World = XMMatrixTranspose(world);
-	//dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	//dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
-	//dataPtr->Mat = mWavesMat;
+	dataPtr = (PerObjectBuffer*)mappedResource.pData;
+	dataPtr->World = XMMatrixTranspose(world);
+	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	dataPtr->TextureTransform = XMMatrixTranspose(XMLoadFloat4x4(&mWaterTexTransform));
+	dataPtr->Mat = mWavesMat;
 
-	//md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-	//md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	//md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 
-	//md3dImmediateContext->PSSetShaderResources(0, 1, &mTexture);
-	//md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mWaterTexture);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
-	//md3dImmediateContext->VSSetShader(mVS, 0, 0);
-	//md3dImmediateContext->PSSetShader(mPS, 0, 0);
+	md3dImmediateContext->VSSetShader(mVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
-	//md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
+	md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -447,6 +460,9 @@ void TextureWavesApp::BuildTex()
 	ID3D11Resource* textureResource;
 	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/grass.dds", &textureResource, &mTexture));
 
+	ID3D11Resource* waterTextureResource;
+	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/water1.dds", &waterTextureResource, &mWaterTexture));
+
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -465,4 +481,5 @@ void TextureWavesApp::BuildTex()
 	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState));
 
 	ReleaseCOM(textureResource);
+	ReleaseCOM(waterTextureResource);
 }

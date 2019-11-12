@@ -70,12 +70,16 @@ private:
 	ID3D11RasterizerState* mWireframeRS;
 
 	ID3D11ShaderResourceView* mTexture;
+	ID3D11ShaderResourceView* mWaterTexture;
 	ID3D11SamplerState* mSampleState;
 
 	XMFLOAT4X4 mGridWorld;
 	XMFLOAT4X4 mWavesWorld;
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
+
+	XMFLOAT4X4 mWaterTexTransform;
+	XMFLOAT2 mWaterTexOffset;
 
 	UINT mGridIndexCount;
 
