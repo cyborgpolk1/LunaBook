@@ -6,7 +6,7 @@ D3DMAIN(CrateApp);
 
 CrateApp::CrateApp(HINSTANCE hInstance)
 	: D3DApp(hInstance), mVB(0), mIB(0), mInputLayout(0), mVS(0), mPS(0), mMatrixBuffer(0),
-	mTheta(1.5f*MathHelper::Pi), mPhi(0.25f*MathHelper::Pi), mRadius(5.0f)
+	mTheta(1.5f*MathHelper::Pi), mPhi(0.25f*MathHelper::Pi), mRadius(5.0f), rotAngle(0.0f)
 {
 	mMainWndCaption = L"Crate Demo";
 
@@ -67,6 +67,12 @@ void CrateApp::UpdateScene(float dt)
 
 	XMMATRIX V = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, V);
+
+	rotAngle += 0.5f * dt;
+	XMMATRIX rot = XMMatrixRotationZ(rotAngle);
+	XMMATRIX offset = XMMatrixTranslation(-0.5f, -0.5f, 0.0f);
+	XMMATRIX invOffset = XMMatrixInverse(&XMMatrixDeterminant(offset), offset);
+	XMStoreFloat4x4(&mTex, offset*rot*invOffset);
 }
 
 void CrateApp::DrawScene()
@@ -95,6 +101,7 @@ void CrateApp::DrawScene()
 
 	MatrixBuffer* dataPtr = (MatrixBuffer*)mappedResource.pData;
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	dataPtr->TexTransform = XMMatrixTranspose(XMLoadFloat4x4(&mTex));
 
 	md3dImmediateContext->Unmap(mMatrixBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
@@ -225,9 +232,9 @@ void CrateApp::BuildTex()
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.MipLODBias = 0.0f;
 	samplerDesc.MaxAnisotropy = 1;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;

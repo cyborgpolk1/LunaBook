@@ -14,6 +14,7 @@ struct Vertex
 struct MatrixBuffer
 {
 	XMMATRIX WorldViewProj;
+	XMMATRIX TexTransform;
 };
 
 class CrateApp : public D3DApp
@@ -54,6 +55,9 @@ private:
 	XMFLOAT4X4 mWorld;
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
+	XMFLOAT4X4 mTex;
+
+	float rotAngle;
 
 	float mTheta;
 	float mPhi;

@@ -1,6 +1,7 @@
 cbuffer PerFrame
 {
     float4x4 gWorldViewProj;
+	float4x4 gTex;
 };
 
 struct VertexIn
@@ -25,7 +26,7 @@ VertexOut VS(VertexIn vin)
 
     vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 
-    vout.TexC = vin.TexC;
+    vout.TexC = mul(float4(vin.TexC, 0.0f, 1.0f), gTex).xy;
 
     return vout;
 }
