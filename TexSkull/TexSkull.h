@@ -5,11 +5,17 @@
 #include "D3DApp.h"
 #include "LightHelper.h"
 
-struct Vertex
+struct TexVertex
 {
 	XMFLOAT3 Pos;
 	XMFLOAT3 Normal;
 	XMFLOAT2 Tex;
+};
+
+struct BasicVertex
+{
+	XMFLOAT3 Pos;
+	XMFLOAT3 Normal;
 };
 
 struct PerFrameBuffer
@@ -48,26 +54,26 @@ public:
 	void OnMouseMove(WPARAM btnState, int x, int y);
 
 private:
-	void BuildGeometryBuffer();
+	void BuildShapeGeometryBuffer();
+	void BuildSkullGeometryBuffer();
 	void BuildFX();
 	void BuildTex();
 
 private:
-	ID3D11Buffer* mShapesVB;
-	ID3D11Buffer* mShapesIB;
-	ID3D11VertexShader* mVS;
-	ID3D11PixelShader* mPS[4];
+	ID3D11Buffer *mShapesVB, *mSkullVB;
+	ID3D11Buffer *mShapesIB, *mSkullIB;
+	ID3D11VertexShader *mTexVS, *mLitVS;
+	ID3D11PixelShader *mTexPS[4], *mLitPS[4];
 
 	ID3D11Buffer* mPerFrameBuffer;
 	ID3D11Buffer* mPerObjectBuffer;
 
-	ID3D11InputLayout* mInputLayout;
+	ID3D11InputLayout *mShapeInputLayout, *mSkullInputLayout;
 
 	int mBoxVertexOffset;
 	int mGridVertexOffset;
 	int mSphereVertexOffset;
 	int mCylinderVertexOffset;
-	int mSkullVertexOffset;
 
 	int mBoxIndexCount;
 	int mGridIndexCount;
@@ -79,7 +85,6 @@ private:
 	int mGridIndexOffset;
 	int mSphereIndexOffset;
 	int mCylinderIndexOffset;
-	int mSkullIndexOffset;
 
 	XMFLOAT4X4 mSphereWorld[10];
 	XMFLOAT4X4 mCylWorld[10];

@@ -10,11 +10,11 @@
 D3DMAIN(TexSkullDemo);
 
 TexSkullDemo::TexSkullDemo(HINSTANCE hInstance)
-	: D3DApp(hInstance), mShapesVB(0), mShapesIB(0), mInputLayout(0), mVS(0), mPerObjectBuffer(0), mPerFrameBuffer(0),
-	mBoxVertexOffset(0), mGridVertexOffset(0), mSphereVertexOffset(0), mCylinderVertexOffset(0), mSkullVertexOffset(0),
+	: D3DApp(hInstance), mShapesVB(0), mShapesIB(0), mShapeInputLayout(0), mTexVS(0), mPerObjectBuffer(0), mPerFrameBuffer(0),
+	mBoxVertexOffset(0), mGridVertexOffset(0), mSphereVertexOffset(0), mCylinderVertexOffset(0), mLitVS(0),
 	mBoxIndexCount(0), mGridIndexCount(0), mSphereIndexCount(0), mCylinderIndexCount(0), mSkullIndexCount(0),
-	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0), mSkullIndexOffset(0),
-	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(15.0f), mLightCount(0)
+	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0), mSkullInputLayout(0),
+	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(15.0f), mLightCount(0), mSkullVB(0), mSkullIB(0)
 {
 	mMainWndCaption = L"Tex Skull Demo";
 
@@ -22,7 +22,11 @@ TexSkullDemo::TexSkullDemo(HINSTANCE hInstance)
 	mLastMousePos.y = 0;
 
 	for (int i = 0; i < 4; ++i)
-		mPS[i] = 0;
+	{
+		mTexPS[i] = 0;
+		mLitPS[i] = 0;
+	}
+		
 
 	XMMATRIX I = XMMatrixIdentity();
 	XMStoreFloat4x4(&mView, I);
@@ -63,23 +67,23 @@ TexSkullDemo::TexSkullDemo(HINSTANCE hInstance)
 	mDirLights[2].Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	mDirLights[2].Direction = XMFLOAT3(0.0f, -0.707f, -0.707f);
 
-	mGridMat.Ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-	mGridMat.Diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-	mGridMat.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+	mGridMat.Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	mGridMat.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	mGridMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
 
-	mCylinderMat.Ambient = XMFLOAT4(0.7f, 0.85f, 0.7f, 1.0f);
-	mCylinderMat.Diffuse = XMFLOAT4(0.7f, 0.85f, 0.7f, 1.0f);
+	mCylinderMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mCylinderMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mCylinderMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
 
 	mSphereMat.Ambient = XMFLOAT4(0.1f, 0.2f, 0.3f, 1.0f);
 	mSphereMat.Diffuse = XMFLOAT4(0.2f, 0.4f, 0.6f, 1.0f);
 	mSphereMat.Specular = XMFLOAT4(0.9f, 0.9f, 0.9f, 16.0f);
 
-	mBoxMat.Ambient = XMFLOAT4(0.651f, 0.5f, 0.392f, 1.0f);
-	mBoxMat.Diffuse = XMFLOAT4(0.651f, 0.5f, 0.392f, 1.0f);
-	mBoxMat.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+	mBoxMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mBoxMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mBoxMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
 
-	mSkullMat.Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	mSkullMat.Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	mSkullMat.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	mSkullMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
 }
@@ -88,10 +92,17 @@ TexSkullDemo::~TexSkullDemo()
 {
 	ReleaseCOM(mShapesVB);
 	ReleaseCOM(mShapesIB);
-	ReleaseCOM(mInputLayout);
-	ReleaseCOM(mVS);
+	ReleaseCOM(mSkullVB);
+	ReleaseCOM(mSkullIB);
+	ReleaseCOM(mShapeInputLayout);
+	ReleaseCOM(mSkullInputLayout);
+	ReleaseCOM(mTexVS);
+	ReleaseCOM(mLitVS);
 	for (int i = 0; i < 4; ++i)
-		ReleaseCOM(mPS[i]);
+	{
+		ReleaseCOM(mTexPS[i]);
+		ReleaseCOM(mLitPS[i]);
+	}
 	ReleaseCOM(mPerFrameBuffer);
 	ReleaseCOM(mPerObjectBuffer);
 	ReleaseCOM(mFloorTex);
@@ -105,7 +116,8 @@ bool TexSkullDemo::Init()
 	if (!D3DApp::Init())
 		return false;
 
-	BuildGeometryBuffer();
+	BuildShapeGeometryBuffer();
+	BuildSkullGeometryBuffer();
 	BuildFX();
 	BuildTex();
 
@@ -153,16 +165,16 @@ void TexSkullDemo::DrawScene()
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::LightSteelBlue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	md3dImmediateContext->IASetInputLayout(mInputLayout);
+	md3dImmediateContext->IASetInputLayout(mShapeInputLayout);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	UINT stride = sizeof(Vertex);
+	UINT stride = sizeof(TexVertex);
 	UINT offset = 0;
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mShapesVB, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mShapesIB, DXGI_FORMAT_R32_UINT, 0);
 
-	md3dImmediateContext->VSSetShader(mVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mPS[mLightCount], 0, 0);
+	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mTexPS[mLightCount], 0, 0);
 
 	XMMATRIX view = XMLoadFloat4x4(&mView);
 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
@@ -187,7 +199,7 @@ void TexSkullDemo::DrawScene()
 	dataPtr->World = XMMatrixTranspose(world);
 	dataPtr->WorldViewProj = XMMatrixTranspose(world*view*proj);
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	dataPtr->gTexTransform = XMMatrixIdentity();
+	dataPtr->gTexTransform = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	dataPtr->Mat = mGridMat;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -211,22 +223,6 @@ void TexSkullDemo::DrawScene()
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mStoneTex);
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 	md3dImmediateContext->DrawIndexed(mBoxIndexCount, mBoxIndexOffset, mBoxVertexOffset);
-
-	// Draw skull
-	world = XMLoadFloat4x4(&mSkullWorld);
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-	dataPtr = (PerObjectBuffer*)mappedResource.pData;
-	dataPtr->World = XMMatrixTranspose(world);
-	dataPtr->WorldViewProj = XMMatrixTranspose(world*view*proj);
-	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	dataPtr->gTexTransform = XMMatrixIdentity();
-	dataPtr->Mat = mSkullMat;
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetShaderResources(0, 1, &mStoneTex);
-	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
-	md3dImmediateContext->DrawIndexed(mSkullIndexCount, mSkullIndexOffset, mSkullVertexOffset);
 
 	// Draw the cylinders
 	for (int i = 0; i < 10; ++i)
@@ -265,6 +261,32 @@ void TexSkullDemo::DrawScene()
 		md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 		md3dImmediateContext->DrawIndexed(mSphereIndexCount, mSphereIndexOffset, mSphereVertexOffset);
 	}
+
+	md3dImmediateContext->IASetInputLayout(mShapeInputLayout);
+	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	stride = sizeof(BasicVertex);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
+
+	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mLitPS[mLightCount], 0, 0);
+
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
+
+	// Draw skull
+	world = XMLoadFloat4x4(&mSkullWorld);
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	dataPtr = (PerObjectBuffer*)mappedResource.pData;
+	dataPtr->World = XMMatrixTranspose(world);
+	dataPtr->WorldViewProj = XMMatrixTranspose(world*view*proj);
+	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	dataPtr->gTexTransform = XMMatrixIdentity();
+	dataPtr->Mat = mSkullMat;
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -307,7 +329,7 @@ void TexSkullDemo::OnMouseMove(WPARAM btnState, int x, int y)
 	mLastMousePos.y = y;
 }
 
-void TexSkullDemo::BuildGeometryBuffer()
+void TexSkullDemo::BuildShapeGeometryBuffer()
 {
 	GeometryGenerator::MeshData box;
 	GeometryGenerator::MeshData grid;
@@ -320,51 +342,11 @@ void TexSkullDemo::BuildGeometryBuffer()
 	geoGen.CreateSphere(0.5f, 20, 20, sphere);
 	geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20, cylinder);
 
-	// Load skull
-	std::ifstream fin(ExePath().append(L"../../../Models/skull.txt").c_str());
-
-	if (!fin)
-	{
-		MessageBox(0, L"skull.txt not found.", 0, 0);
-		return;
-	}
-
-	UINT vcount = 0;
-	UINT tcount = 0;
-	std::string ignore;
-
-	fin >> ignore >> vcount;
-	fin >> ignore >> tcount;
-	fin >> ignore >> ignore >> ignore >> ignore;
-
-	std::vector<Vertex> skullVertices(vcount);
-	for (UINT i = 0; i < vcount; ++i)
-	{
-		fin >> skullVertices[i].Pos.x >> skullVertices[i].Pos.y >> skullVertices[i].Pos.z;
-
-		fin >> skullVertices[i].Normal.x >> skullVertices[i].Normal.y >> skullVertices[i].Normal.z;
-
-		skullVertices[i].Tex.x = 0.0f;
-		skullVertices[i].Tex.y = 0.0f;
-	}
-
-	fin >> ignore >> ignore >> ignore;
-
-	mSkullIndexCount = 3 * tcount;
-	std::vector<UINT> skullIndices(mSkullIndexCount);
-	for (UINT i = 0; i < tcount; ++i)
-	{
-		fin >> skullIndices[i * 3 + 0] >> skullIndices[i * 3 + 1] >> skullIndices[i * 3 + 2];
-	}
-
-	fin.close();
-
 	// Cache the vertex offsets to each object in the concatenated vertex buffer.
 	mBoxVertexOffset = 0;
 	mGridVertexOffset = (UINT)box.Vertices.size();
 	mSphereVertexOffset = mGridVertexOffset + (UINT)grid.Vertices.size();
 	mCylinderVertexOffset = mSphereVertexOffset + (UINT)sphere.Vertices.size();
-	mSkullVertexOffset = mCylinderVertexOffset + (UINT)cylinder.Vertices.size();
 
 	// Cache the index count of each object.
 	mBoxIndexCount = (UINT)box.Indices.size();
@@ -377,15 +359,14 @@ void TexSkullDemo::BuildGeometryBuffer()
 	mGridIndexOffset = mBoxIndexCount;
 	mSphereIndexOffset = mGridIndexOffset + mGridIndexCount;
 	mCylinderIndexOffset = mSphereIndexOffset + mSphereIndexCount;
-	mSkullIndexOffset = mCylinderIndexOffset + mCylinderIndexCount;
 
-	UINT totalVertexCount = (UINT)(box.Vertices.size() + grid.Vertices.size() + sphere.Vertices.size() + cylinder.Vertices.size() + skullVertices.size());
+	UINT totalVertexCount = (UINT)(box.Vertices.size() + grid.Vertices.size() + sphere.Vertices.size() + cylinder.Vertices.size());
 
-	UINT totalIndexCount = mBoxIndexCount + mGridIndexCount + mSphereIndexCount + mCylinderIndexCount + mSkullIndexCount;
+	UINT totalIndexCount = mBoxIndexCount + mGridIndexCount + mSphereIndexCount + mCylinderIndexCount;
 
 	// Extract the vertex elements we are interested in and pack all
 	// the vertices of all meshes into one vertex buffer
-	std::vector<Vertex> vertices(totalVertexCount);
+	std::vector<TexVertex> vertices(totalVertexCount);
 
 	XMFLOAT4 black(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -418,16 +399,9 @@ void TexSkullDemo::BuildGeometryBuffer()
 		vertices[k].Tex = cylinder.Vertices[i].TexC;
 	}
 
-	for (size_t i = 0; i < skullVertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = skullVertices[i].Pos;
-		vertices[k].Normal = skullVertices[i].Normal;
-		vertices[k].Tex = skullVertices[i].Tex;
-	}
-
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex) * totalVertexCount;
+	vbd.ByteWidth = sizeof(TexVertex) * totalVertexCount;
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
@@ -441,7 +415,6 @@ void TexSkullDemo::BuildGeometryBuffer()
 	indices.insert(indices.end(), grid.Indices.begin(), grid.Indices.end());
 	indices.insert(indices.end(), sphere.Indices.begin(), sphere.Indices.end());
 	indices.insert(indices.end(), cylinder.Indices.begin(), cylinder.Indices.end());
-	indices.insert(indices.end(), skullIndices.begin(), skullIndices.end());
 
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -452,6 +425,65 @@ void TexSkullDemo::BuildGeometryBuffer()
 	D3D11_SUBRESOURCE_DATA initData;
 	initData.pSysMem = &indices[0];
 	HR(md3dDevice->CreateBuffer(&ibd, &initData, &mShapesIB));
+}
+
+void TexSkullDemo::BuildSkullGeometryBuffer()
+{
+	// Load skull
+	std::ifstream fin(ExePath().append(L"../../../Models/skull.txt").c_str());
+
+	if (!fin)
+	{
+		MessageBox(0, L"skull.txt not found.", 0, 0);
+		return;
+	}
+
+	UINT vcount = 0;
+	UINT tcount = 0;
+	std::string ignore;
+
+	fin >> ignore >> vcount;
+	fin >> ignore >> tcount;
+	fin >> ignore >> ignore >> ignore >> ignore;
+
+	std::vector<BasicVertex> skullVertices(vcount);
+	for (UINT i = 0; i < vcount; ++i)
+	{
+		fin >> skullVertices[i].Pos.x >> skullVertices[i].Pos.y >> skullVertices[i].Pos.z;
+
+		fin >> skullVertices[i].Normal.x >> skullVertices[i].Normal.y >> skullVertices[i].Normal.z;
+	}
+
+	fin >> ignore >> ignore >> ignore;
+
+	mSkullIndexCount = 3 * tcount;
+	std::vector<UINT> skullIndices(mSkullIndexCount);
+	for (UINT i = 0; i < tcount; ++i)
+	{
+		fin >> skullIndices[i * 3 + 0] >> skullIndices[i * 3 + 1] >> skullIndices[i * 3 + 2];
+	}
+
+	fin.close();
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(BasicVertex) * vcount;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &skullVertices[0];
+	HR(md3dDevice->CreateBuffer(&vbd, &vinitData, &mSkullVB));
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT) * mSkullIndexCount;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = &skullIndices[0];
+	HR(md3dDevice->CreateBuffer(&ibd, &initData, &mSkullIB));
 }
 
 void TexSkullDemo::BuildFX()
@@ -469,13 +501,15 @@ void TexSkullDemo::BuildFX()
 		{ 0, 0 }
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 3);
+	CreateShader(&mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mShapeInputLayout, vertexDesc, 3);
+	CreateShader(&mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
 
 	for (int i = 0; i < 4; ++i)
 	{
 		std::string lightMacro = std::to_string(i);
 		basicEffectDefines[0] = { "NUM_LIGHTS", lightMacro.c_str() };
-		CreateShader(&mPS[i], ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
+		CreateShader(&mTexPS[i], ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
+		CreateShader(&mLitPS[i], ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", basicEffectDefines);
 	}
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
