@@ -6,7 +6,7 @@ D3DMAIN(BlendExamplesApp);
 
 BlendExamplesApp::BlendExamplesApp(HINSTANCE hInstance)
 	: D3DApp(hInstance), mVB(0), mIB(0), mInputLayout(0), mVS(0), mPS(0),
-	mSampleState(0), mMatrixBuffer(0), mIndexCount(0)
+	mSampleState(0), mMatrixBuffer(0), mIndexCount(0), mDS(0)
 {
 	mMainWndCaption = L"Blend Examples Demo";
 
@@ -15,6 +15,9 @@ BlendExamplesApp::BlendExamplesApp(HINSTANCE hInstance)
 
 	for (int i = 0; i < 2; i++)
 		mTexture[i] = 0;
+
+	for (int i = 0; i < 4; i++)
+		mStates[i] = 0;
 }
 
 BlendExamplesApp::~BlendExamplesApp()
@@ -28,6 +31,9 @@ BlendExamplesApp::~BlendExamplesApp()
 	for (int i = 0; i < 2; i++)
 		ReleaseCOM(mTexture[i]);
 	ReleaseCOM(mSampleState);
+	for (int i = 0; i < 4; i++)
+		ReleaseCOM(mStates[i]);
+	ReleaseCOM(mDS);
 }
 
 bool BlendExamplesApp::Init()
@@ -38,6 +44,7 @@ bool BlendExamplesApp::Init()
 	BuildGeometryBuffers();
 	BuildFX();
 	BuildTex();
+	BuildBlendStates();
 
 	return true;
 }
@@ -65,26 +72,32 @@ void BlendExamplesApp::DrawScene()
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
-	for (int i = 0; i < 8; i++) 
+	for (int i = 0; i < 8; i++)
 	{
 		int j = i;
 
 		if (i >= 2)
-		{
 			j = i / 2 + 1;
-		}
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		HR(md3dImmediateContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
 		MatrixBuffer* dataPtr = (MatrixBuffer*)mappedResource.pData;
-		dataPtr->WorldViewProj = mTransforms[j] * XMMatrixTranspose(XMMatrixTranslation(0.0f, 0.3f * (i%2), 0.0f));
+		dataPtr->WorldViewProj = mTransforms[j];
 
 		md3dImmediateContext->Unmap(mMatrixBuffer, 0);
 		md3dImmediateContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
 
-		md3dImmediateContext->PSSetShaderResources(0, 1, &mTexture[i%2]);
+		md3dImmediateContext->PSSetShaderResources(0, 1, &mTexture[i % 2]);
 		md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+
+		md3dImmediateContext->OMSetDepthStencilState(mDS, 0);
+
+		float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		if (i % 2 == 1)
+			md3dImmediateContext->OMSetBlendState(mStates[i/2], blendFactors, 0xffffffff);
+		else
+			md3dImmediateContext->OMSetBlendState(mStates[0], blendFactors, 0xffffffff);
 
 		md3dImmediateContext->DrawIndexed(mIndexCount, 0, 0);
 	}
@@ -188,6 +201,47 @@ void BlendExamplesApp::BuildTex()
 
 	for (int i = 0; i < 2; i++)
 		ReleaseCOM(textureResource[i]);
+}
+
+void BlendExamplesApp::BuildBlendStates()
+{
+	// None
+	D3D11_BLEND_DESC blendDesc;
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = false;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	HR(md3dDevice->CreateBlendState(&blendDesc, &mStates[0]));
+
+	// Add
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+
+	HR(md3dDevice->CreateBlendState(&blendDesc, &mStates[1]));
+
+	// Subtract
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_SUBTRACT;
+
+	HR(md3dDevice->CreateBlendState(&blendDesc, &mStates[2]));
+
+	// Multiply
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_SRC_COLOR;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+
+	HR(md3dDevice->CreateBlendState(&blendDesc, &mStates[3]));
+
+	D3D11_DEPTH_STENCIL_DESC depthDesc;
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+
+	HR(md3dDevice->CreateDepthStencilState(&depthDesc, &mDS));
 }
 
 

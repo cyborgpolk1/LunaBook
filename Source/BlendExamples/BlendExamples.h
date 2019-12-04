@@ -32,6 +32,7 @@ private:
 	void BuildGeometryBuffers();
 	void BuildFX();
 	void BuildTex();
+	void BuildBlendStates();
 
 private:
 	ID3D11Buffer* mVB;
@@ -46,6 +47,9 @@ private:
 
 	ID3D11ShaderResourceView* mTexture[2];
 	ID3D11SamplerState* mSampleState;
+
+	ID3D11BlendState* mStates[4];
+	ID3D11DepthStencilState* mDS;
 
 	XMMATRIX mTransforms[5];
 };
