@@ -9,9 +9,9 @@ D3DMAIN(BlendDemo);
 
 BlendDemo::BlendDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mLandVB(0), mLandIB(0), mWavesVB(0), mWavesIB(0), mVS(0), mPS(0),
-	mPerObjectBuffer(0), mPerFrameBuffer(0), mInputLayout(0), mWireframeRS(0), mGridIndexCount(0),
+	mPerObjectBuffer(0), mPerFrameBuffer(0), mInputLayout(0), mNoCullRS(0), mGridIndexCount(0),
 	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(200.0f), mWaterTexOffset(0.0f, 0.0f),
-	mEyePosW(0.0f, 0.0f, 0.0f), mCrateVB(0), mCrateIB(0), mCrateTexture(0)
+	mEyePosW(0.0f, 0.0f, 0.0f), mCrateVB(0), mCrateIB(0), mCrateTexture(0), mTransparentBlend(0)
 {
 	mMainWndCaption = L"Blend Demo";
 
@@ -27,30 +27,27 @@ BlendDemo::BlendDemo(HINSTANCE hInstance)
 	XMMATRIX crateMatrix = XMMatrixScaling(15.0f, 15.0f, 15.0f) * XMMatrixTranslation(8.0f, 5.0f, -15.0f);
 	XMStoreFloat4x4(&mCrateWorld, crateMatrix);
 
-	mDirLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	mDirLight.Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	mDirLight.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	mDirLight.Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+	mDirLights[0].Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLights[0].Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mDirLights[0].Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	mDirLights[0].Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
 
-	mPointLight.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	mPointLight.Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	mPointLight.Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	mPointLight.Att = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	mPointLight.Range = 25.0f;
+	mDirLights[1].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	mDirLights[1].Diffuse = XMFLOAT4(0.20f, 0.20f, 0.20f, 1.0f);
+	mDirLights[1].Specular = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	mDirLights[1].Direction = XMFLOAT3(-0.57735f, -0.57735f, 0.57735f);
 
-	mSpotLight.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	mSpotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	mSpotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	mSpotLight.Att = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	mSpotLight.Spot = 96.0f;
-	mSpotLight.Range = 10000.0f;
+	mDirLights[2].Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	mDirLights[2].Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mDirLights[2].Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	mDirLights[2].Direction = XMFLOAT3(0.0f, -0.707f, -0.707f);;
 
 	mLandMat.Ambient = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
 	mLandMat.Diffuse = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
 	mLandMat.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 
 	mWavesMat.Ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
-	mWavesMat.Diffuse = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
+	mWavesMat.Diffuse = XMFLOAT4(0.137f, 0.42f, 0.556f, 0.5f);
 	mWavesMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
 
 	mCrateMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -75,6 +72,8 @@ BlendDemo::~BlendDemo()
 	ReleaseCOM(mWaterTexture);
 	ReleaseCOM(mCrateTexture);
 	ReleaseCOM(mSampleState);
+	ReleaseCOM(mNoCullRS);
+	ReleaseCOM(mTransparentBlend);
 }
 
 bool BlendDemo::Init()
@@ -90,14 +89,28 @@ bool BlendDemo::Init()
 	BuildFX();
 	BuildTex();
 
-	D3D11_RASTERIZER_DESC wireframeDesc;
-	ZeroMemory(&wireframeDesc, sizeof(D3D11_RASTERIZER_DESC));
-	wireframeDesc.FillMode = D3D11_FILL_WIREFRAME;
-	wireframeDesc.CullMode = D3D11_CULL_BACK;
-	wireframeDesc.FrontCounterClockwise = false;
-	wireframeDesc.DepthClipEnable = true;
+	D3D11_RASTERIZER_DESC noCullDesc;
+	ZeroMemory(&noCullDesc, sizeof(D3D11_RASTERIZER_DESC));
+	noCullDesc.FillMode = D3D11_FILL_SOLID;
+	noCullDesc.CullMode = D3D11_CULL_NONE;
+	noCullDesc.FrontCounterClockwise = false;
+	noCullDesc.DepthClipEnable = true;
 
-	HR(md3dDevice->CreateRasterizerState(&wireframeDesc, &mWireframeRS));
+	HR(md3dDevice->CreateRasterizerState(&noCullDesc, &mNoCullRS));
+
+	D3D11_BLEND_DESC blendDesc = {0};
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	HR(md3dDevice->CreateBlendState(&blendDesc, &mTransparentBlend));
 
 	return true;
 }
@@ -167,22 +180,11 @@ void BlendDemo::UpdateScene(float dt)
 	}
 
 	md3dImmediateContext->Unmap(mWavesVB, 0);
-
-
-	// Circle the light over the land surface
-	mPointLight.Position.x = 70.0f * cosf(0.2f * mTimer.TotalTime());
-	mPointLight.Position.z = 70.0f * sinf(0.2f * mTimer.TotalTime());
-	mPointLight.Position.y = MathHelper::Max(GetHeight(mPointLight.Position.x, mPointLight.Position.z), -3.0f) + 10.0f;
-
-	// The spotlight takes on the camera position and is aimed in the same direction the camera is looking.
-	// In this way, it looks like we are holding a flashlight.
-	mSpotLight.Position = mEyePosW;
-	XMStoreFloat3(&mSpotLight.Direction, XMVector3Normalize(target - pos));
 }
 
 void BlendDemo::DrawScene()
 {
-	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::LightSteelBlue));
+	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	md3dImmediateContext->IASetInputLayout(mInputLayout);
@@ -193,10 +195,14 @@ void BlendDemo::DrawScene()
 	HR(md3dImmediateContext->Map(mPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
 	PerFrameBuffer* frameDataPtr = (PerFrameBuffer*)mappedResource.pData;
-	frameDataPtr->DirLight = mDirLight;
-	frameDataPtr->PLight = mPointLight;
-	frameDataPtr->SLight = mSpotLight;
+	frameDataPtr->DirLights[0] = mDirLights[0];
+	frameDataPtr->DirLights[1] = mDirLights[1];
+	frameDataPtr->DirLights[2] = mDirLights[2];
 	frameDataPtr->EyePosW = mEyePosW;
+	
+	frameDataPtr->FogStart = 15.0f;
+	frameDataPtr->FogRange = 175.0f;
+	frameDataPtr->FogColor = XMFLOAT4(reinterpret_cast<const float*>(&Colors::Silver));
 
 	md3dImmediateContext->Unmap(mPerFrameBuffer, 0);
 	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
@@ -234,44 +240,10 @@ void BlendDemo::DrawScene()
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mLandTexture);
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
-	md3dImmediateContext->RSSetState(0);
-
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
 	md3dImmediateContext->DrawIndexed(mGridIndexCount, 0, 0);
-
-
-
-	// WATER
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
-	md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set constants
-	world = XMLoadFloat4x4(&mWavesWorld);
-	worldViewProj = world * view * proj;
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	dataPtr = (PerObjectBuffer*)mappedResource.pData;
-	dataPtr->World = XMMatrixTranspose(world);
-	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
-	dataPtr->TextureTransform = XMMatrixTranspose(XMLoadFloat4x4(&mWaterTexTransform));
-	dataPtr->Mat = mWavesMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-
-	md3dImmediateContext->PSSetShaderResources(0, 1, &mWaterTexture);
-	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
-
-	md3dImmediateContext->VSSetShader(mVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mPS, 0, 0);
-
-	md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
-
 
 
 	// CRATE
@@ -300,7 +272,46 @@ void BlendDemo::DrawScene()
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
+	md3dImmediateContext->RSSetState(mNoCullRS);
+
 	md3dImmediateContext->DrawIndexed(mCrateIndexCount, 0, 0);
+
+	md3dImmediateContext->RSSetState(0);
+
+
+	// WATER
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mWavesIB, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set constants
+	world = XMLoadFloat4x4(&mWavesWorld);
+	worldViewProj = world * view * proj;
+
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	dataPtr = (PerObjectBuffer*)mappedResource.pData;
+	dataPtr->World = XMMatrixTranspose(world);
+	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
+	dataPtr->TextureTransform = XMMatrixTranspose(XMLoadFloat4x4(&mWaterTexTransform));
+	dataPtr->Mat = mWavesMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mWaterTexture);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+
+	float blendFactors[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	md3dImmediateContext->OMSetBlendState(mTransparentBlend, blendFactors, 0xfffffff);
+
+	md3dImmediateContext->VSSetShader(mVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mPS, 0, 0);
+
+	md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
+
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 
 
 	HR(mSwapChain->Present(0, 0));
@@ -512,9 +523,14 @@ void BlendDemo::BuildFX()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicTextureAndLighting.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 3);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicTextureAndLighting.hlsl").c_str(), "PS", 0);
+	D3D_SHADER_MACRO basicEffectDefines[] = {
+		{ "CLIP", "1" },
+		{"FOG", "1"},
+		{ 0, 0 }
+	};
 
+	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 3);
+	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;
@@ -547,7 +563,7 @@ void BlendDemo::BuildTex()
 	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/water1.dds", &waterTextureResource, &mWaterTexture));
 
 	ID3D11Resource* crateTextureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/WoodCrate01.dds", &crateTextureResource, &mCrateTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/WireFence.dds", &crateTextureResource, &mCrateTexture));
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

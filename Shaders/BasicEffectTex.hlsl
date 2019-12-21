@@ -11,8 +11,8 @@ cbuffer cbPerFrame : register(b0)
     float3 gEyePosW;
 
     float gFogStart;
+	float4 gFogColor;
     float gFogRange;
-    float4 gFogColor;
 };
 
 cbuffer cbPerObject : register(b1)
@@ -61,6 +61,9 @@ VertexOut VS(VertexIn vin)
 float4 PS(VertexOut pin) : SV_Target
 {
 	float4 texColor = gTex.Sample(gSample, pin.TexC);
+#ifdef CLIP
+	clip(texColor.a - 0.1f);
+#endif
 
     // Interpolating normal can unnormalize it, so normalize it.
     pin.NormalW = normalize(pin.NormalW);
@@ -97,6 +100,12 @@ float4 PS(VertexOut pin) : SV_Target
     }
 
 	float4 litColor = texColor * (ambient + diffuse) + spec;
+
+#ifdef FOG
+	float fogLerp = saturate((distToEye - gFogStart) / gFogRange);
+
+	litColor = lerp(litColor, gFogColor, fogLerp);
+#endif
 
     // Common to take alpha from diffuse material.
 	litColor.a = gMaterial.Diffuse.a * texColor.a;

@@ -22,13 +22,17 @@ struct PerObjectBuffer
 	Material Mat;
 };
 
+#pragma pack 4
 struct PerFrameBuffer
 {
-	DirectionalLight DirLight;
-	PointLight PLight;
-	SpotLight SLight;
+	DirectionalLight DirLights[3];
 	XMFLOAT3 EyePosW;
-	float pad;
+
+	float FogStart;
+	XMFLOAT4 FogColor;
+	float FogRange;
+
+	XMFLOAT3 pad;
 };
 
 class BlendDemo : public D3DApp
@@ -70,12 +74,14 @@ private:
 
 	ID3D11InputLayout* mInputLayout;
 
-	ID3D11RasterizerState* mWireframeRS;
+	ID3D11RasterizerState* mNoCullRS;
 
 	ID3D11ShaderResourceView* mLandTexture;
 	ID3D11ShaderResourceView* mWaterTexture;
 	ID3D11ShaderResourceView* mCrateTexture;
 	ID3D11SamplerState* mSampleState;
+
+	ID3D11BlendState* mTransparentBlend;
 
 	XMFLOAT4X4 mGridWorld;
 	XMFLOAT4X4 mWavesWorld;
@@ -96,9 +102,7 @@ private:
 
 	POINT mLastMousePos;
 
-	DirectionalLight mDirLight;
-	PointLight mPointLight;
-	SpotLight mSpotLight;
+	DirectionalLight mDirLights[3];
 
 	Material mLandMat;
 	Material mWavesMat;
