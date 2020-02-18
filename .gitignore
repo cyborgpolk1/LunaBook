@@ -13,6 +13,10 @@
 *.aps
 *.cache
 *.user
+*.db-shm
+*.db-wal
+*.ipch
+*.VC.opendb
 [Bb]in/
 Common.lib
 *.VC.VC.opendb
