@@ -238,7 +238,7 @@ void BlendExamplesApp::BuildBlendStates()
 
 	HR(md3dDevice->CreateBlendState(&blendDesc, &mStates[3]));
 
-	D3D11_DEPTH_STENCIL_DESC depthDesc;
+	D3D11_DEPTH_STENCIL_DESC depthDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 
 	HR(md3dDevice->CreateDepthStencilState(&depthDesc, &mDS));
