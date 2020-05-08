@@ -241,6 +241,18 @@ void BlendExamplesApp::BuildBlendStates()
 	D3D11_DEPTH_STENCIL_DESC depthDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 
+	// Above is the same as below
+	/*D3D11_DEPTH_STENCIL_DESC depthDesc;
+	depthDesc.DepthEnable = true;
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthDesc.StencilEnable = false;
+	depthDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	depthDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+	const D3D11_DEPTH_STENCILOP_DESC defaultStencilOp = {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS };
+	depthDesc.FrontFace = defaultStencilOp;
+	depthDesc.BackFace = defaultStencilOp;*/
+
 	HR(md3dDevice->CreateDepthStencilState(&depthDesc, &mDS));
 }
 
