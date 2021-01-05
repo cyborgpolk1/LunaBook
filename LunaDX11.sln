@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CH01", "CH01", "{1A0B269C-715E-4FD2-AF9A-59B321D341DA}"
 EndProject
@@ -185,6 +185,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlendExamples", "Source\BlendExamples\BlendExamples.vcxproj", "{0C92F3C1-421F-44FC-A72A-1C6E9774B00D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlendDemo", "Source\BlendDemo\BlendDemo.vcxproj", "{10CB9939-92B4-496C-8BD4-D71EBFE1B858}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppendixC", "AppendixC", "{7ECB1C7D-9B6D-4946-8630-1FDADC0D7341}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayPlaneIntersection", "RayPlaneIntersection\RayPlaneIntersection.vcxproj", "{DA3551C8-C804-4E83-B581-FBF6D072C9B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -442,6 +446,14 @@ Global
 		{10CB9939-92B4-496C-8BD4-D71EBFE1B858}.Release|x64.Build.0 = Release|x64
 		{10CB9939-92B4-496C-8BD4-D71EBFE1B858}.Release|x86.ActiveCfg = Release|Win32
 		{10CB9939-92B4-496C-8BD4-D71EBFE1B858}.Release|x86.Build.0 = Release|Win32
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Debug|x64.ActiveCfg = Debug|x64
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Debug|x64.Build.0 = Debug|x64
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Debug|x86.ActiveCfg = Debug|Win32
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Debug|x86.Build.0 = Debug|Win32
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Release|x64.ActiveCfg = Release|x64
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Release|x64.Build.0 = Release|x64
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Release|x86.ActiveCfg = Release|Win32
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -477,5 +489,9 @@ Global
 		{B3D8796D-3632-449B-B92A-3CE8421F33FA} = {0AE2623E-D086-4184-8938-C5EFED1EF0F3}
 		{0C92F3C1-421F-44FC-A72A-1C6E9774B00D} = {A51A15E9-5166-4E7B-A138-ECA77F7F1FBC}
 		{10CB9939-92B4-496C-8BD4-D71EBFE1B858} = {A51A15E9-5166-4E7B-A138-ECA77F7F1FBC}
+		{DA3551C8-C804-4E83-B581-FBF6D072C9B0} = {7ECB1C7D-9B6D-4946-8630-1FDADC0D7341}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
 	EndGlobalSection
 EndGlobal
