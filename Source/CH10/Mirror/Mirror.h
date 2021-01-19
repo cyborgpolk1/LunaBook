@@ -64,6 +64,9 @@ private:
 	void BuildSkullGeometryBuffer();
 	void BuildFX();
 	void BuildTex();
+	void BuildRasterizerStates();
+	void BuildDepthStencilStates();
+	void BuildBlendStates();
 
 private:
 	ID3D11Buffer* mRoomVB;
@@ -77,6 +80,7 @@ private:
 	ID3D11PixelShader *mTexPS, *mLitPS;
 
 	ID3D11Buffer* mPerFrameBuffer;
+	ID3D11Buffer* mReflectedPerFrameBuffer;
 	ID3D11Buffer* mPerObjectBuffer;
 
 	ID3D11InputLayout* mRoomInputLayout;
@@ -101,6 +105,15 @@ private:
 	ID3D11ShaderResourceView* mWallTexture;
 	ID3D11ShaderResourceView* mMirrorTexture;
 	ID3D11SamplerState* mSampleState;
+
+	ID3D11RasterizerState* mCullClockwiseRS;
+
+	ID3D11DepthStencilState* mMarkMirrorDSS;
+	ID3D11DepthStencilState* mDrawReflectionDSS;
+	ID3D11DepthStencilState* mNoDoubleBlendDSS;
+
+	ID3D11BlendState* mNoRenderTargetWriteBS;
+	ID3D11BlendState* mTransparentBS;
 
 	float mTheta;
 	float mPhi;

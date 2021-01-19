@@ -10,7 +10,9 @@ D3DMAIN(MirrorDemo);
 
 MirrorDemo::MirrorDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mRoomVB(0), mSkullVB(0), mSkullIB(0), mSkullIndexCount(0),
-	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mPerFrameBuffer(0), mPerObjectBuffer(0),
+	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0),
+	mMarkMirrorDSS(0), mDrawReflectionDSS(0), mNoDoubleBlendDSS(0), mNoRenderTargetWriteBS(0), mTransparentBS(0),
+	mPerFrameBuffer(0), mReflectedPerFrameBuffer(0), mPerObjectBuffer(0),
 	mRoomInputLayout(0), mSkullInputLayout(0), mEyePosW(0.0f, 0.0f, 0.0f), mSampleState(0),
 	mFloorTexture(0), mWallTexture(0), mMirrorTexture(0), mSkullTranslation(0.0f, 1.0f, -5.0f),
 	mTheta(1.24f * MathHelper::Pi), mPhi(0.42f * MathHelper::Pi), mRadius(12.0f)
@@ -70,10 +72,17 @@ MirrorDemo::~MirrorDemo()
 	ReleaseCOM(mLitPS);
 	ReleaseCOM(mPerObjectBuffer);
 	ReleaseCOM(mPerFrameBuffer);
+	ReleaseCOM(mReflectedPerFrameBuffer);
 	ReleaseCOM(mFloorTexture);
 	ReleaseCOM(mWallTexture);
 	ReleaseCOM(mMirrorTexture);
 	ReleaseCOM(mSampleState);
+	ReleaseCOM(mCullClockwiseRS);
+	ReleaseCOM(mMarkMirrorDSS);
+	ReleaseCOM(mDrawReflectionDSS);
+	ReleaseCOM(mNoDoubleBlendDSS);
+	ReleaseCOM(mNoRenderTargetWriteBS);
+	ReleaseCOM(mTransparentBS);
 }
 
 bool MirrorDemo::Init()
@@ -85,6 +94,9 @@ bool MirrorDemo::Init()
 	BuildSkullGeometryBuffer();
 	BuildFX();
 	BuildTex();
+	BuildRasterizerStates();
+	BuildDepthStencilStates();
+	BuildBlendStates();
 
 	return true;
 }
@@ -137,6 +149,8 @@ void MirrorDemo::UpdateScene(float dt)
 
 void MirrorDemo::DrawScene()
 {
+	float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::LightSteelBlue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -149,9 +163,10 @@ void MirrorDemo::DrawScene()
 
 	PerFrameBuffer* frameDataPtr = (PerFrameBuffer*)mappedResource.pData;
 	frameDataPtr->EyePosW = mEyePosW;
-	frameDataPtr->DirLights[0] = mDirLights[0];
-	frameDataPtr->DirLights[1] = mDirLights[1];
-	frameDataPtr->DirLights[2] = mDirLights[2];
+	for (int i = 0; i < 3; ++i)
+	{
+		frameDataPtr->DirLights[i] = mDirLights[i];
+	}
 
 	md3dImmediateContext->Unmap(mPerFrameBuffer, 0);
 
@@ -231,6 +246,202 @@ void MirrorDemo::DrawScene()
 	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
 
 	//
+	// Shadow
+	//
+	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
+	XMVECTOR toMainLight = -XMLoadFloat3(&mDirLights[0].Direction);
+	XMMATRIX S = XMMatrixShadow(shadowPlane, toMainLight);
+	XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.001f, 0.0f);
+
+	world = XMLoadFloat4x4(&mSkullWorld) * S * shadowOffsetY;
+
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = mShadowMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+
+	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 0);
+
+	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
+
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+
+	//
+	// Render Mirror to Stencil Only
+	//
+	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
+	stride = sizeof(TexVertex);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
+
+	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
+
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
+
+	world = XMLoadFloat4x4(&mRoomWorld);
+
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = mMirrorMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mMirrorTexture);
+
+	md3dImmediateContext->OMSetBlendState(mNoRenderTargetWriteBS, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(mMarkMirrorDSS, 1);
+
+	md3dImmediateContext->Draw(6, 24);
+
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+
+	//
+	// Per-frame reflection constants
+	//
+
+	XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
+	XMMATRIX R = XMMatrixReflect(mirrorPlane);
+
+	mappedResource;
+	HR(md3dImmediateContext->Map(mReflectedPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	frameDataPtr = (PerFrameBuffer*)mappedResource.pData;
+	frameDataPtr->EyePosW = mEyePosW;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		frameDataPtr->DirLights[i] = mDirLights[i];
+
+		XMVECTOR lightDir = XMLoadFloat3(&mDirLights[i].Direction);
+		XMVECTOR reflectedLightDir = XMVector3TransformNormal(lightDir, R);
+		XMStoreFloat3(&frameDataPtr->DirLights[i].Direction, reflectedLightDir);
+	}
+
+	md3dImmediateContext->Unmap(mReflectedPerFrameBuffer, 0);
+
+	//
+	// Reflected Skull
+	//
+	md3dImmediateContext->IASetInputLayout(mSkullInputLayout);
+	stride = sizeof(BasicVertex);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
+
+	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mLitPS, 0, 0);
+
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mReflectedPerFrameBuffer);
+
+	world = XMLoadFloat4x4(&mSkullWorld) * R;
+
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = mSkullMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mFloorTexture);
+
+	md3dImmediateContext->RSSetState(mCullClockwiseRS);
+	md3dImmediateContext->OMSetDepthStencilState(mDrawReflectionDSS, 1); // Comment/Remove this line for EXERCISE 3
+
+	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
+
+	//
+	// Reflected Floor (EXERCISE 11)
+	//
+	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
+	stride = sizeof(TexVertex);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
+
+	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
+
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mReflectedPerFrameBuffer);
+
+	world = XMLoadFloat4x4(&mRoomWorld) * R;
+
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = mRoomMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->OMSetDepthStencilState(mDrawReflectionDSS, 1);
+
+	md3dImmediateContext->Draw(6, 0);
+
+	//
+	// Reflected Shadow
+	//
+	md3dImmediateContext->IASetInputLayout(mSkullInputLayout);
+	stride = sizeof(BasicVertex);
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
+	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
+
+	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mLitPS, 0, 0);
+
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mReflectedPerFrameBuffer);
+
+	world = XMLoadFloat4x4(&mSkullWorld) * S * shadowOffsetY * R;
+
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = mShadowMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+
+	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
+
+	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
+
+	md3dImmediateContext->RSSetState(0);
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+
+	//
 	// Mirror
 	//
 	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
@@ -259,7 +470,12 @@ void MirrorDemo::DrawScene()
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mMirrorTexture);
+
+	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
+
 	md3dImmediateContext->Draw(6, 24);
+
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -318,8 +534,8 @@ void MirrorDemo::BuildRoomGeometryBuffer()
 	
 	// Wall
 	v[6] = TexVertex(-3.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 2.0f);
-	v[7] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 2.0f);
-	v[8] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.5f, 2.0f);
+	v[7] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 0.0f);
+	v[8] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.5f, 0.0f);
 
 	v[9]  = TexVertex(-3.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 2.0f);
 	v[10] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.5f, 0.0f);
@@ -454,6 +670,7 @@ void MirrorDemo::BuildFX()
 	perFrameBufferDesc.StructureByteStride = 0;
 
 	HR(md3dDevice->CreateBuffer(&perFrameBufferDesc, 0, &mPerFrameBuffer));
+	HR(md3dDevice->CreateBuffer(&perFrameBufferDesc, 0, &mReflectedPerFrameBuffer));
 }
 
 void MirrorDemo::BuildTex()
@@ -484,4 +701,120 @@ void MirrorDemo::BuildTex()
 	ReleaseCOM(floorResource);
 	ReleaseCOM(brickResource);
 	ReleaseCOM(mirrorResource);
+}
+
+void MirrorDemo::BuildRasterizerStates()
+{
+	D3D11_RASTERIZER_DESC cullClockwiseDesc;
+	cullClockwiseDesc.AntialiasedLineEnable = false;
+	cullClockwiseDesc.CullMode = D3D11_CULL_BACK;
+	cullClockwiseDesc.DepthBias = 0;
+	cullClockwiseDesc.DepthBiasClamp = 0;
+	cullClockwiseDesc.DepthClipEnable = true;
+	cullClockwiseDesc.FillMode = D3D11_FILL_SOLID;
+	cullClockwiseDesc.FrontCounterClockwise = true;
+	cullClockwiseDesc.MultisampleEnable = false;
+	cullClockwiseDesc.ScissorEnable = false;
+	cullClockwiseDesc.SlopeScaledDepthBias = 0;
+
+	HR(md3dDevice->CreateRasterizerState(&cullClockwiseDesc, &mCullClockwiseRS));
+}
+
+void MirrorDemo::BuildDepthStencilStates()
+{
+	D3D11_DEPTH_STENCIL_DESC mirrorDesc;
+	mirrorDesc.DepthEnable = true;
+	mirrorDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	mirrorDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	mirrorDesc.StencilEnable = true;
+	mirrorDesc.StencilReadMask = 0xff;
+	mirrorDesc.StencilWriteMask = 0xff;
+
+	mirrorDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	mirrorDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	mirrorDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	mirrorDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// We are not rendering backfacing polygons, so these settings do not matter
+	mirrorDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	mirrorDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	mirrorDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	mirrorDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	HR(md3dDevice->CreateDepthStencilState(&mirrorDesc, &mMarkMirrorDSS));
+
+	D3D11_DEPTH_STENCIL_DESC drawReflectionDesc;
+	drawReflectionDesc.DepthEnable = true;
+	drawReflectionDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	drawReflectionDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	drawReflectionDesc.StencilEnable = true;
+	drawReflectionDesc.StencilReadMask = 0xff;
+	drawReflectionDesc.StencilWriteMask = 0xff;
+
+	drawReflectionDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	drawReflectionDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	drawReflectionDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	drawReflectionDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+
+	// We are not rendering backfacing polygons, so these settings do not matter
+	drawReflectionDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	drawReflectionDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	drawReflectionDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	drawReflectionDesc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+
+	HR(md3dDevice->CreateDepthStencilState(&drawReflectionDesc, &mDrawReflectionDSS));
+
+	D3D11_DEPTH_STENCIL_DESC noDoubleBlendDesc;
+	noDoubleBlendDesc.DepthEnable = true;
+	noDoubleBlendDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	noDoubleBlendDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	noDoubleBlendDesc.StencilEnable = true;
+	noDoubleBlendDesc.StencilReadMask = 0xff;
+	noDoubleBlendDesc.StencilWriteMask = 0xff;
+
+	noDoubleBlendDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	noDoubleBlendDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	noDoubleBlendDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
+	noDoubleBlendDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+
+	// We are not rendering backfacing polygons, so these settings do not matter
+	noDoubleBlendDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	noDoubleBlendDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	noDoubleBlendDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
+	noDoubleBlendDesc.BackFace.StencilFunc = D3D11_COMPARISON_LESS;
+
+	HR(md3dDevice->CreateDepthStencilState(&noDoubleBlendDesc, &mNoDoubleBlendDSS));
+}
+
+void MirrorDemo::BuildBlendStates()
+{
+	D3D11_BLEND_DESC noRenderTargetWriteDesc;
+	noRenderTargetWriteDesc.AlphaToCoverageEnable = false;
+	noRenderTargetWriteDesc.IndependentBlendEnable = false;
+
+	noRenderTargetWriteDesc.RenderTarget[0].BlendEnable = false;
+	noRenderTargetWriteDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	noRenderTargetWriteDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	noRenderTargetWriteDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	noRenderTargetWriteDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	noRenderTargetWriteDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	noRenderTargetWriteDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	noRenderTargetWriteDesc.RenderTarget[0].RenderTargetWriteMask = 0;
+
+	HR(md3dDevice->CreateBlendState(&noRenderTargetWriteDesc, &mNoRenderTargetWriteBS));
+
+	D3D11_BLEND_DESC transparentDesc;
+	transparentDesc.AlphaToCoverageEnable = false;
+	transparentDesc.IndependentBlendEnable = false;
+
+	transparentDesc.RenderTarget[0].BlendEnable = true;
+	transparentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	transparentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	transparentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	transparentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	HR(md3dDevice->CreateBlendState(&transparentDesc, &mTransparentBS));
 }
