@@ -277,6 +277,9 @@ void MirrorDemo::DrawScene()
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 
+
+	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	//
 	// Render Mirror to Stencil Only
 	//
