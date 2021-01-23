@@ -107,6 +107,7 @@ private:
 	ID3D11SamplerState* mSampleState;
 
 	ID3D11RasterizerState* mCullClockwiseRS;
+	ID3D11RasterizerState* mNoCullRS;
 
 	ID3D11DepthStencilState* mMarkMirrorDSS;
 	ID3D11DepthStencilState* mDrawReflectionDSS;

@@ -10,7 +10,7 @@ D3DMAIN(MirrorDemo);
 
 MirrorDemo::MirrorDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mRoomVB(0), mSkullVB(0), mSkullIB(0), mSkullIndexCount(0),
-	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0),
+	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0), mNoCullRS(0),
 	mMarkMirrorDSS(0), mDrawReflectionDSS(0), mNoDoubleBlendDSS(0), mNoRenderTargetWriteBS(0), mTransparentBS(0),
 	mPerFrameBuffer(0), mReflectedPerFrameBuffer(0), mPerObjectBuffer(0),
 	mRoomInputLayout(0), mSkullInputLayout(0), mEyePosW(0.0f, 0.0f, 0.0f), mSampleState(0),
@@ -78,6 +78,7 @@ MirrorDemo::~MirrorDemo()
 	ReleaseCOM(mMirrorTexture);
 	ReleaseCOM(mSampleState);
 	ReleaseCOM(mCullClockwiseRS);
+	ReleaseCOM(mNoCullRS);
 	ReleaseCOM(mMarkMirrorDSS);
 	ReleaseCOM(mDrawReflectionDSS);
 	ReleaseCOM(mNoDoubleBlendDSS);
@@ -198,6 +199,8 @@ void MirrorDemo::DrawScene()
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
+	md3dImmediateContext->RSSetState(mNoCullRS);
+
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
@@ -213,6 +216,8 @@ void MirrorDemo::DrawScene()
 	//
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mWallTexture);
 	md3dImmediateContext->Draw(18, 6);
+
+	md3dImmediateContext->RSSetState(0);
 
 	//
 	// Skull
@@ -721,6 +726,20 @@ void MirrorDemo::BuildRasterizerStates()
 	cullClockwiseDesc.SlopeScaledDepthBias = 0;
 
 	HR(md3dDevice->CreateRasterizerState(&cullClockwiseDesc, &mCullClockwiseRS));
+
+	D3D11_RASTERIZER_DESC noCullDesc;
+	cullClockwiseDesc.AntialiasedLineEnable = false;
+	cullClockwiseDesc.CullMode = D3D11_CULL_NONE;
+	cullClockwiseDesc.DepthBias = 0;
+	cullClockwiseDesc.DepthBiasClamp = 0;
+	cullClockwiseDesc.DepthClipEnable = true;
+	cullClockwiseDesc.FillMode = D3D11_FILL_SOLID;
+	cullClockwiseDesc.FrontCounterClockwise = true;
+	cullClockwiseDesc.MultisampleEnable = false;
+	cullClockwiseDesc.ScissorEnable = false;
+	cullClockwiseDesc.SlopeScaledDepthBias = 0;
+
+	HR(md3dDevice->CreateRasterizerState(&cullClockwiseDesc, &mNoCullRS));
 }
 
 void MirrorDemo::BuildDepthStencilStates()
