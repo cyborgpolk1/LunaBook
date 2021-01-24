@@ -77,7 +77,7 @@ private:
 	void SetRoomConstants();
 	void SetSkullConstants();
 
-	void DrawWall();
+	void DrawWall(bool drawBackWall);
 	void DrawFloor();
 	void DrawMirror();
 	void DrawSkull(Material skullMat);

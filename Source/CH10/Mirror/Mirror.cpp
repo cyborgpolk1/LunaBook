@@ -175,13 +175,14 @@ void MirrorDemo::DrawScene()
 	mCurrentPerFrameBuffer = mPerFrameBuffer;
 
 
+	DrawWall(false);
 
 	md3dImmediateContext->RSSetState(mNoCullRS);
-	DrawWall();
 	DrawFloor();
 	md3dImmediateContext->RSSetState(0);
 
 	md3dImmediateContext->RSSetState(mCullClockwiseRS);
+	DrawWall(true);
 	DrawMirror();
 	md3dImmediateContext->RSSetState(0);
 
@@ -290,7 +291,7 @@ void MirrorDemo::SetSkullConstants()
 	currentConstants = SKULL;
 }
 
-void MirrorDemo::DrawWall()
+void MirrorDemo::DrawWall(bool drawBackWall)
 {
 	if (currentConstants != ROOM)
 	{
@@ -319,6 +320,23 @@ void MirrorDemo::DrawWall()
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mWallTexture);
 
 	md3dImmediateContext->Draw(18, 6);
+
+	if (drawBackWall)
+	{
+		mappedResource;
+		HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+		PerObjectBuffer* objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+		objectDataPtr->World = XMMatrixTranspose(world);
+		objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+		objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+		objectDataPtr->gTexTransform = XMMatrixScaling(2.0f, 2.0f, 1.0f);
+		objectDataPtr->Mat = mRoomMat;
+
+		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+		md3dImmediateContext->Draw(6, 24);
+	}
 }
 
 void MirrorDemo::DrawMirror()
@@ -465,13 +483,13 @@ void MirrorDemo::BuildRoomGeometryBuffer()
 	v[5] = TexVertex( 7.5f, 0.0f, -10.0f,    0.0f, 1.0f, 0.0f,    4.0f, 4.0f);
 	
 	// Wall
-	v[6] = TexVertex(-3.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 2.0f);
-	v[7] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 0.0f);
-	v[8] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.5f, 0.0f);
+	v[6] = TexVertex(-3.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    1.6f, 2.0f);
+	v[7] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    1.6f, 0.0f);
+	v[8] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    2.0f, 0.0f);
 
-	v[9]  = TexVertex(-3.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 2.0f);
-	v[10] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.5f, 0.0f);
-	v[11] = TexVertex(-2.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.5f, 2.0f);
+	v[9]  = TexVertex(-3.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    1.6f, 2.0f);
+	v[10] = TexVertex(-2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    2.0f, 0.0f);
+	v[11] = TexVertex(-2.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    2.0f, 2.0f);
 
 	v[12] = TexVertex(2.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 2.0f);
 	v[13] = TexVertex(2.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 0.0f);
@@ -481,11 +499,11 @@ void MirrorDemo::BuildRoomGeometryBuffer()
 	v[16] = TexVertex(7.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    2.0f, 0.0f);
 	v[17] = TexVertex(7.5f, 0.0f, 0.0f,    0.0f, 0.0f, -1.0f,    2.0f, 2.0f);
 
-	v[18] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 1.0f);
-	v[19] = TexVertex(-3.5f, 6.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 0.0f);
+	v[18] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    1.6f, 1.0f);
+	v[19] = TexVertex(-3.5f, 6.0f, 0.0f,    0.0f, 0.0f, -1.0f,    1.6f, 0.0f);
 	v[20] = TexVertex( 7.5f, 6.0f, 0.0f,    0.0f, 0.0f, -1.0f,    6.0f, 0.0f);
 
-	v[21] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    0.0f, 1.0f);
+	v[21] = TexVertex(-3.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    1.6f, 1.0f);
 	v[22] = TexVertex( 7.5f, 6.0f, 0.0f,    0.0f, 0.0f, -1.0f,    6.0f, 0.0f);
 	v[23] = TexVertex( 7.5f, 4.0f, 0.0f,    0.0f, 0.0f, -1.0f,    6.0f, 1.0f);
 
