@@ -10,9 +10,9 @@ D3DMAIN(MirrorDemo);
 
 MirrorDemo::MirrorDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mRoomVB(0), mSkullVB(0), mSkullIB(0), mSkullIndexCount(0),
-	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0), mNoCullRS(0),
+	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0), mNoCullRS(0), currentConstants(NONE),
 	mMarkMirrorDSS(0), mDrawReflectionDSS(0), mNoDoubleBlendDSS(0), mNoRenderTargetWriteBS(0), mTransparentBS(0),
-	mPerFrameBuffer(0), mReflectedPerFrameBuffer(0), mPerObjectBuffer(0),
+	mPerFrameBuffer(0), mReflectedPerFrameBuffer(0), mPerObjectBuffer(0), mCurrentPerFrameBuffer(0),
 	mRoomInputLayout(0), mSkullInputLayout(0), mEyePosW(0.0f, 0.0f, 0.0f), mSampleState(0),
 	mFloorTexture(0), mWallTexture(0), mMirrorTexture(0), mSkullTranslation(0.0f, 1.0f, -5.0f),
 	mTheta(1.24f * MathHelper::Pi), mPhi(0.42f * MathHelper::Pi), mRadius(12.0f)
@@ -57,6 +57,8 @@ MirrorDemo::MirrorDemo(HINSTANCE hInstance)
 	mShadowMat.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	mShadowMat.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
 	mShadowMat.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 16.0f);
+
+	matrixStack.push(XMMatrixIdentity());
 }
 
 MirrorDemo::~MirrorDemo()
@@ -157,7 +159,6 @@ void MirrorDemo::DrawScene()
 
 	XMMATRIX view = XMLoadFloat4x4(&mView);
 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
-	XMMATRIX viewProj = view * proj;
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HR(md3dImmediateContext->Map(mPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
@@ -171,162 +172,45 @@ void MirrorDemo::DrawScene()
 
 	md3dImmediateContext->Unmap(mPerFrameBuffer, 0);
 
-	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
-	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCurrentPerFrameBuffer = mPerFrameBuffer;
 
-	UINT stride = sizeof(TexVertex);
-	UINT offset = 0;
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
-	
-	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
 
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
-
-	//
-	// Constants common to room objects
-	//
-	XMMATRIX world = XMLoadFloat4x4(&mRoomWorld);
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	PerObjectBuffer* objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
-	objectDataPtr->World = XMMatrixTranspose(world);
-	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
-	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	objectDataPtr->gTexTransform = XMMatrixIdentity();
-	objectDataPtr->Mat = mRoomMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
 	md3dImmediateContext->RSSetState(mNoCullRS);
-
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
-
-	//
-	// Floor
-	//
-	md3dImmediateContext->PSSetShaderResources(0, 1, &mFloorTexture);
-	md3dImmediateContext->Draw(6, 0);
-
-	//
-	// Wall
-	//
-	md3dImmediateContext->PSSetShaderResources(0, 1, &mWallTexture);
-	md3dImmediateContext->Draw(18, 6);
-
+	DrawWall();
+	DrawFloor();
 	md3dImmediateContext->RSSetState(0);
 
-	//
-	// Skull
-	//
-	md3dImmediateContext->IASetInputLayout(mSkullInputLayout);
-	stride = sizeof(BasicVertex);
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
-	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
+	md3dImmediateContext->RSSetState(mCullClockwiseRS);
+	DrawMirror();
+	md3dImmediateContext->RSSetState(0);
 
-	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mLitPS, 0, 0);
+	DrawSkull(mSkullMat);
 
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
-
-	world = XMLoadFloat4x4(&mSkullWorld);
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
-	objectDataPtr->World = XMMatrixTranspose(world);
-	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
-	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	objectDataPtr->gTexTransform = XMMatrixIdentity();
-	objectDataPtr->Mat = mSkullMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-
-	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
-
-	//
-	// Shadow
-	//
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
 	XMVECTOR toMainLight = -XMLoadFloat3(&mDirLights[0].Direction);
 	XMMATRIX S = XMMatrixShadow(shadowPlane, toMainLight);
 	XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.001f, 0.0f);
 
-	world = XMLoadFloat4x4(&mSkullWorld) * S * shadowOffsetY;
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
-	objectDataPtr->World = XMMatrixTranspose(world);
-	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
-	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	objectDataPtr->gTexTransform = XMMatrixIdentity();
-	objectDataPtr->Mat = mShadowMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-
+	matrixStack.push(matrixStack.top() * S * shadowOffsetY);
 	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 0);
-
-	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
-
+	DrawSkull(mShadowMat);
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
-
+	matrixStack.pop();
 
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	//
-	// Render Mirror to Stencil Only
-	//
-	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
-	stride = sizeof(TexVertex);
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
-
-	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
-
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
-
-	world = XMLoadFloat4x4(&mRoomWorld);
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
-	objectDataPtr->World = XMMatrixTranspose(world);
-	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
-	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	objectDataPtr->gTexTransform = XMMatrixIdentity();
-	objectDataPtr->Mat = mMirrorMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
-	md3dImmediateContext->PSSetShaderResources(0, 1, &mMirrorTexture);
-
 	md3dImmediateContext->OMSetBlendState(mNoRenderTargetWriteBS, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(mMarkMirrorDSS, 1);
-
-	md3dImmediateContext->Draw(6, 24);
-
+	DrawMirror();
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 
 	//
 	// Per-frame reflection constants
 	//
-
 	XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
 	XMMATRIX R = XMMatrixReflect(mirrorPlane);
 
@@ -346,59 +230,81 @@ void MirrorDemo::DrawScene()
 	}
 
 	md3dImmediateContext->Unmap(mReflectedPerFrameBuffer, 0);
+	mCurrentPerFrameBuffer = mReflectedPerFrameBuffer;
 
-	//
-	// Reflected Skull
-	//
+	matrixStack.push(matrixStack.top() * R);
+	md3dImmediateContext->RSSetState(mCullClockwiseRS);
+	md3dImmediateContext->OMSetDepthStencilState(mDrawReflectionDSS, 1); // Comment/Remove this line for EXERCISE 3
+	DrawSkull(mSkullMat);
+	DrawFloor(); // Reflected Floor (EXERCISE 11)
+	matrixStack.pop();
+
+	matrixStack.push(matrixStack.top() * S * shadowOffsetY * R);
+	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
+	DrawSkull(mShadowMat);
+	md3dImmediateContext->RSSetState(0);
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	matrixStack.pop();
+
+	mCurrentPerFrameBuffer = mPerFrameBuffer;
+
+	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
+	DrawMirror();
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+
+	HR(mSwapChain->Present(0, 0));
+}
+
+void MirrorDemo::SetRoomConstants()
+{
+	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
+	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	UINT stride = sizeof(TexVertex);
+	UINT offset = 0;
+	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
+
+	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
+
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mCurrentPerFrameBuffer);
+
+	currentConstants = ROOM;
+}
+
+void MirrorDemo::SetSkullConstants()
+{
 	md3dImmediateContext->IASetInputLayout(mSkullInputLayout);
-	stride = sizeof(BasicVertex);
+	UINT stride = sizeof(BasicVertex);
+	UINT offset = 0;
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
 
 	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mLitPS, 0, 0);
 
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mReflectedPerFrameBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mCurrentPerFrameBuffer);
 
-	world = XMLoadFloat4x4(&mSkullWorld) * R;
+	currentConstants = SKULL;
+}
 
+void MirrorDemo::DrawWall()
+{
+	if (currentConstants != ROOM)
+	{
+		SetRoomConstants();
+	}
+
+	XMMATRIX world = XMLoadFloat4x4(&mRoomWorld) * matrixStack.top();
+	XMMATRIX view = XMLoadFloat4x4(&mView);
+	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
-	objectDataPtr->World = XMMatrixTranspose(world);
-	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
-	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	objectDataPtr->gTexTransform = XMMatrixIdentity();
-	objectDataPtr->Mat = mSkullMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-
-	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
-	md3dImmediateContext->PSSetShaderResources(0, 1, &mFloorTexture);
-
-	md3dImmediateContext->RSSetState(mCullClockwiseRS);
-	md3dImmediateContext->OMSetDepthStencilState(mDrawReflectionDSS, 1); // Comment/Remove this line for EXERCISE 3
-
-	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
-
-	//
-	// Reflected Floor (EXERCISE 11)
-	//
-	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
-	stride = sizeof(TexVertex);
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
-
-	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
-
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mReflectedPerFrameBuffer);
-
-	world = XMLoadFloat4x4(&mRoomWorld) * R;
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	PerObjectBuffer* objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
 	objectDataPtr->World = XMMatrixTranspose(world);
 	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
 	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
@@ -407,65 +313,29 @@ void MirrorDemo::DrawScene()
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
-	md3dImmediateContext->OMSetDepthStencilState(mDrawReflectionDSS, 1);
-
-	md3dImmediateContext->Draw(6, 0);
-
-	//
-	// Reflected Shadow
-	//
-	md3dImmediateContext->IASetInputLayout(mSkullInputLayout);
-	stride = sizeof(BasicVertex);
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
-	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
-
-	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mLitPS, 0, 0);
-
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mReflectedPerFrameBuffer);
-
-	world = XMLoadFloat4x4(&mSkullWorld) * S * shadowOffsetY * R;
-
-	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
-	objectDataPtr->World = XMMatrixTranspose(world);
-	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
-	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
-	objectDataPtr->gTexTransform = XMMatrixIdentity();
-	objectDataPtr->Mat = mShadowMat;
-
-	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
-
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mWallTexture);
 
-	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
-	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
+	md3dImmediateContext->Draw(18, 6);
+}
 
-	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
+void MirrorDemo::DrawMirror()
+{
+	if (currentConstants != ROOM)
+	{
+		SetRoomConstants();
+	}
 
-	md3dImmediateContext->RSSetState(0);
-	md3dImmediateContext->OMSetDepthStencilState(0, 0);
-	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	XMMATRIX world = XMLoadFloat4x4(&mRoomWorld) * matrixStack.top();
+	XMMATRIX view = XMLoadFloat4x4(&mView);
+	XMMATRIX proj = XMLoadFloat4x4(&mProj);
 
-	//
-	// Mirror
-	//
-	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
-	stride = sizeof(TexVertex);
-	md3dImmediateContext->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
-
-	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
-
-	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
-
-	world = XMLoadFloat4x4(&mRoomWorld);
-
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	PerObjectBuffer* objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
 	objectDataPtr->World = XMMatrixTranspose(world);
 	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
 	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
@@ -479,13 +349,67 @@ void MirrorDemo::DrawScene()
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mMirrorTexture);
 
-	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
-
 	md3dImmediateContext->Draw(6, 24);
+}
 
-	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+void MirrorDemo::DrawSkull(Material skullMat)
+{
+	if (currentConstants != SKULL)
+	{
+		SetSkullConstants();
+	}
 
-	HR(mSwapChain->Present(0, 0));
+	XMMATRIX world = XMLoadFloat4x4(&mSkullWorld) * matrixStack.top();
+	XMMATRIX view = XMLoadFloat4x4(&mView);
+	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	PerObjectBuffer* objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = skullMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+
+	md3dImmediateContext->DrawIndexed(mSkullIndexCount, 0, 0);
+}
+
+void MirrorDemo::DrawFloor()
+{
+	if (currentConstants != ROOM)
+	{
+		SetRoomConstants();
+	}
+
+	XMMATRIX world = XMLoadFloat4x4(&mRoomWorld) * matrixStack.top();
+	XMMATRIX view = XMLoadFloat4x4(&mView);
+	XMMATRIX proj = XMLoadFloat4x4(&mProj);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HR(md3dImmediateContext->Map(mPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+	PerObjectBuffer* objectDataPtr = (PerObjectBuffer*)mappedResource.pData;
+	objectDataPtr->World = XMMatrixTranspose(world);
+	objectDataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
+	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
+	objectDataPtr->gTexTransform = XMMatrixIdentity();
+	objectDataPtr->Mat = mRoomMat;
+
+	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
+
+	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mFloorTexture);
+
+	md3dImmediateContext->Draw(6, 0);
 }
 
 void MirrorDemo::OnMouseDown(WPARAM btnState, int x, int y)

@@ -3,7 +3,13 @@
 #include "CommonLibs.h"
 #include "D3DApp.h"
 #include "LightHelper.h"
+#include <stack>
 
+enum Constants {
+	NONE,
+	ROOM,
+	SKULL
+};
 
 struct TexVertex
 {
@@ -68,6 +74,14 @@ private:
 	void BuildDepthStencilStates();
 	void BuildBlendStates();
 
+	void SetRoomConstants();
+	void SetSkullConstants();
+
+	void DrawWall();
+	void DrawFloor();
+	void DrawMirror();
+	void DrawSkull(Material skullMat);
+
 private:
 	ID3D11Buffer* mRoomVB;
 
@@ -76,11 +90,14 @@ private:
 	
 	UINT mSkullIndexCount;
 
+	Constants currentConstants;
+
 	ID3D11VertexShader *mTexVS, *mLitVS;
 	ID3D11PixelShader *mTexPS, *mLitPS;
 
 	ID3D11Buffer* mPerFrameBuffer;
 	ID3D11Buffer* mReflectedPerFrameBuffer;
+	ID3D11Buffer* mCurrentPerFrameBuffer;
 	ID3D11Buffer* mPerObjectBuffer;
 
 	ID3D11InputLayout* mRoomInputLayout;
@@ -121,4 +138,6 @@ private:
 	float mRadius;
 
 	POINT mLastMousePos;
+
+	std::stack<XMMATRIX> matrixStack;
 };
