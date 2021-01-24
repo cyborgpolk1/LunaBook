@@ -537,9 +537,9 @@ void TexSkullDemo::BuildTex()
 {
 	ID3D11Resource *floorResource, *brickResource, *stoneResource;
 
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/floor.dds", &floorResource, &mFloorTex));
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/bricks.dds", &brickResource, &mBrickTex));
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/stone.dds", &stoneResource, &mStoneTex));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/floor.dds").c_str(), &floorResource, &mFloorTex));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/bricks.dds").c_str(), &brickResource, &mBrickTex));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/stone.dds").c_str(), &stoneResource, &mStoneTex));
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

@@ -557,13 +557,13 @@ void BlendDemo::BuildFX()
 void BlendDemo::BuildTex()
 {
 	ID3D11Resource* textureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/grass.dds", &textureResource, &mLandTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/grass.dds").c_str(), &textureResource, &mLandTexture));
 
 	ID3D11Resource* waterTextureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/water1.dds", &waterTextureResource, &mWaterTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/water1.dds").c_str(), &waterTextureResource, &mWaterTexture));
 
 	ID3D11Resource* crateTextureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/WireFence.dds", &crateTextureResource, &mCrateTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/WireFence.dds").c_str(), &crateTextureResource, &mCrateTexture));
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

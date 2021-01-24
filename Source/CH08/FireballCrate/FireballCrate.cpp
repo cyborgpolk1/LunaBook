@@ -227,8 +227,8 @@ void CrateApp::BuildFX()
 void CrateApp::BuildTex()
 {
 	ID3D11Resource *textureResource, *maskResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/flare.dds", &textureResource, &mFlareTexture));
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/flarealpha.dds", &maskResource, &mMaskTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/flare.dds").c_str(), &textureResource, &mFlareTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/flarealpha.dds").c_str(), &maskResource, &mMaskTexture));
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

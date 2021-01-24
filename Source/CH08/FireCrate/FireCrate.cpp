@@ -230,7 +230,7 @@ void FireCrateApp::BuildTex()
 	ID3D11Resource* textureResource[120];
 	for (int i = 0; i < 120; i++)
 	{
-		std::wstring filename(L"../../../Textures/FireAnim/Fire");
+		std::wstring filename(ExePath().append(L"../../../Textures/FireAnim/Fire"));
 
 		std::wstringstream ss;
 		ss << filename;

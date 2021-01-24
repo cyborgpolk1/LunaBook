@@ -218,7 +218,7 @@ void CrateApp::BuildFX()
 void CrateApp::BuildTex()
 {
 	ID3D11Resource* textureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, L"../../../Textures/WoodCrate01.dds", &textureResource, &mTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/WoodCrate01.dds").c_str(), &textureResource, &mTexture));
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
