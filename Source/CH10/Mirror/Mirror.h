@@ -127,6 +127,7 @@ private:
 	ID3D11RasterizerState* mNoCullRS;
 
 	ID3D11DepthStencilState* mMarkMirrorDSS;
+	ID3D11DepthStencilState* mMarkFloorDSS;
 	ID3D11DepthStencilState* mDrawReflectionDSS;
 	ID3D11DepthStencilState* mNoDoubleBlendDSS;
 

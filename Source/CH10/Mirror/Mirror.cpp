@@ -11,7 +11,8 @@ D3DMAIN(MirrorDemo);
 MirrorDemo::MirrorDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mRoomVB(0), mSkullVB(0), mSkullIB(0), mSkullIndexCount(0),
 	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0), mNoCullRS(0), currentConstants(NONE),
-	mMarkMirrorDSS(0), mDrawReflectionDSS(0), mNoDoubleBlendDSS(0), mNoRenderTargetWriteBS(0), mTransparentBS(0),
+	mMarkMirrorDSS(0), mDrawReflectionDSS(0), mNoDoubleBlendDSS(0), mMarkFloorDSS(0),
+	mNoRenderTargetWriteBS(0), mTransparentBS(0),
 	mPerFrameBuffer(0), mReflectedPerFrameBuffer(0), mPerObjectBuffer(0), mCurrentPerFrameBuffer(0),
 	mRoomInputLayout(0), mSkullInputLayout(0), mEyePosW(0.0f, 0.0f, 0.0f), mSampleState(0),
 	mFloorTexture(0), mWallTexture(0), mMirrorTexture(0), mSkullTranslation(0.0f, 1.0f, -5.0f),
@@ -176,16 +177,14 @@ void MirrorDemo::DrawScene()
 
 
 	DrawWall(false);
-
 	md3dImmediateContext->RSSetState(mNoCullRS);
+	md3dImmediateContext->OMSetDepthStencilState(mMarkFloorDSS, 1);
 	DrawFloor();
-	md3dImmediateContext->RSSetState(0);
-
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->RSSetState(mCullClockwiseRS);
 	DrawWall(true);
 	DrawMirror();
 	md3dImmediateContext->RSSetState(0);
-
 	DrawSkull(mSkullMat);
 
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
@@ -195,12 +194,15 @@ void MirrorDemo::DrawScene()
 
 	matrixStack.push(matrixStack.top() * S * shadowOffsetY);
 	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
-	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 0);
+	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
 	DrawSkull(mShadowMat);
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 	matrixStack.pop();
 
+	//
+	// Reflections
+	//
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	md3dImmediateContext->OMSetBlendState(mNoRenderTargetWriteBS, blendFactors, 0xffffffff);
@@ -209,9 +211,6 @@ void MirrorDemo::DrawScene()
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 
-	//
-	// Per-frame reflection constants
-	//
 	XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
 	XMMATRIX R = XMMatrixReflect(mirrorPlane);
 
@@ -707,6 +706,27 @@ void MirrorDemo::BuildDepthStencilStates()
 
 	HR(md3dDevice->CreateDepthStencilState(&mirrorDesc, &mMarkMirrorDSS));
 
+	D3D11_DEPTH_STENCIL_DESC floorDesc;
+	floorDesc.DepthEnable = true;
+	floorDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	floorDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	floorDesc.StencilEnable = true;
+	floorDesc.StencilReadMask = 0xff;
+	floorDesc.StencilWriteMask = 0xff;
+
+	floorDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	floorDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	floorDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	floorDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// We are not rendering backfacing polygons, so these settings do not matter
+	floorDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	floorDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	floorDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	floorDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	HR(md3dDevice->CreateDepthStencilState(&floorDesc, &mMarkFloorDSS));
+
 	D3D11_DEPTH_STENCIL_DESC drawReflectionDesc;
 	drawReflectionDesc.DepthEnable = true;
 	drawReflectionDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -745,7 +765,7 @@ void MirrorDemo::BuildDepthStencilStates()
 	noDoubleBlendDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	noDoubleBlendDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	noDoubleBlendDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
-	noDoubleBlendDesc.BackFace.StencilFunc = D3D11_COMPARISON_LESS;
+	noDoubleBlendDesc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 
 	HR(md3dDevice->CreateDepthStencilState(&noDoubleBlendDesc, &mNoDoubleBlendDSS));
 }
