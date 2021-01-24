@@ -18,6 +18,12 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OverdrawStencil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="OverdrawStencil.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{68afd10f-3bc7-40f3-8354-6d12bd8c54aa}</ProjectGuid>
     <RootNamespace>OverdrawStencil</RootNamespace>
