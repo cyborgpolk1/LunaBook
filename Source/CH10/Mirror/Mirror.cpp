@@ -175,30 +175,31 @@ void MirrorDemo::DrawScene()
 
 	mCurrentPerFrameBuffer = mPerFrameBuffer;
 
-
-	DrawWall(false);
+	//
+	// Rooom
+	//
 	md3dImmediateContext->RSSetState(mNoCullRS);
 	md3dImmediateContext->OMSetDepthStencilState(mMarkFloorDSS, 1);
 	DrawFloor();
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->RSSetState(mCullClockwiseRS);
 	DrawWall(true);
-	DrawMirror();
 	md3dImmediateContext->RSSetState(0);
 	DrawSkull(mSkullMat);
 
-	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
+	XMVECTOR floorShadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
 	XMVECTOR toMainLight = -XMLoadFloat3(&mDirLights[0].Direction);
-	XMMATRIX S = XMMatrixShadow(shadowPlane, toMainLight);
+	XMMATRIX floorS = XMMatrixShadow(floorShadowPlane, toMainLight);
 	XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.001f, 0.0f);
 
-	matrixStack.push(matrixStack.top() * S * shadowOffsetY);
+	matrixStack.push(matrixStack.top() * floorS * shadowOffsetY);
 	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
 	DrawSkull(mShadowMat);
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 	matrixStack.pop();
+
 
 	//
 	// Reflections
@@ -239,7 +240,7 @@ void MirrorDemo::DrawScene()
 	DrawFloor(); // Reflected Floor (EXERCISE 11)
 	matrixStack.pop();
 
-	matrixStack.push(matrixStack.top() * S * shadowOffsetY * R);
+	matrixStack.push(matrixStack.top() * floorS * shadowOffsetY * R);
 	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
 	DrawSkull(mShadowMat);
@@ -250,9 +251,25 @@ void MirrorDemo::DrawScene()
 
 	mCurrentPerFrameBuffer = mPerFrameBuffer;
 
+	md3dImmediateContext->OMSetDepthStencilState(mMarkFloorDSS, 1);
+	DrawWall(false);
 	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
 	DrawMirror();
 	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+
+	XMVECTOR wallShadowPlane = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f); // xy plane
+	XMMATRIX wallS = XMMatrixShadow(wallShadowPlane, toMainLight);
+	XMMATRIX shadowOffsetZ = XMMatrixTranslation(0.0f, 0.0f, -0.001f);
+
+	matrixStack.push(matrixStack.top() * wallS * shadowOffsetZ);
+	md3dImmediateContext->OMSetBlendState(mTransparentBS, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetDepthStencilState(mNoDoubleBlendDSS, 1);
+	DrawSkull(mShadowMat);
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	matrixStack.pop();
+
 
 	HR(mSwapChain->Present(0, 0));
 }
