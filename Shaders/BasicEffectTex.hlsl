@@ -107,8 +107,12 @@ float4 PS(VertexOut pin) : SV_Target
 	litColor = lerp(litColor, gFogColor, fogLerp);
 #endif
 
+#ifdef OVERDRAW
+    litColor = float4(0.1f, 0.1f, 0.1f, 1.0f);
+#else
     // Common to take alpha from diffuse material.
-	litColor.a = gMaterial.Diffuse.a * texColor.a;
+    litColor.a = gMaterial.Diffuse.a * texColor.a;
+#endif
 
     return litColor;
 }

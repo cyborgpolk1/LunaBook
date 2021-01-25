@@ -141,6 +141,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mirror", "Source\CH10\Mirro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OverdrawStencil", "Source\CH10\OverdrawStencil\OverdrawStencil.vcxproj", "{68AFD10F-3BC7-40F3-8354-6D12BD8C54AA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OverdrawBlend", "Source\CH10\OverdrawBlend\OverdrawBlend.vcxproj", "{035EBA46-0C1E-4031-A134-377C9093E47E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -421,6 +423,14 @@ Global
 		{68AFD10F-3BC7-40F3-8354-6D12BD8C54AA}.Release|x64.Build.0 = Release|x64
 		{68AFD10F-3BC7-40F3-8354-6D12BD8C54AA}.Release|x86.ActiveCfg = Release|Win32
 		{68AFD10F-3BC7-40F3-8354-6D12BD8C54AA}.Release|x86.Build.0 = Release|Win32
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Debug|x64.ActiveCfg = Debug|x64
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Debug|x64.Build.0 = Debug|x64
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Debug|x86.ActiveCfg = Debug|Win32
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Debug|x86.Build.0 = Debug|Win32
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x64.ActiveCfg = Release|x64
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x64.Build.0 = Release|x64
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x86.ActiveCfg = Release|Win32
+		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -459,6 +469,7 @@ Global
 		{0C92F3C1-421F-44FC-A72A-1C6E9774B00D} = {E9E779CA-A6C2-441A-89EC-260A48871953}
 		{D957017F-DFFA-403C-ACFB-D462E5901254} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 		{68AFD10F-3BC7-40F3-8354-6D12BD8C54AA} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
+		{035EBA46-0C1E-4031-A134-377C9093E47E} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
