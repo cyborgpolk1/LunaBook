@@ -69,6 +69,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
 		Shaders\LightHelper.hlsl = Shaders\LightHelper.hlsl
 		Shaders\Multitexture.hlsl = Shaders\Multitexture.hlsl
+		Shaders\OverdrawQuad.hlsl = Shaders\OverdrawQuad.hlsl
 		Shaders\ToonLighting.hlsl = Shaders\ToonLighting.hlsl
 	EndProjectSection
 EndProject

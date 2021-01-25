@@ -5,6 +5,7 @@
 #include "Waves.h"
 #include "LightHelper.h"
 #include "DDSTextureLoader.h"
+#include <array>
 
 struct Vertex
 {
@@ -25,12 +26,11 @@ struct PerObjectBuffer
 struct QuadVertex
 {
 	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
 };
 
 struct PerQuadBuffer
 {
-	XMMATRIX WorldViewProj;
+	XMFLOAT4 Color;
 };
 
 #pragma pack 4
@@ -44,6 +44,17 @@ struct PerFrameBuffer
 	float FogRange;
 
 	XMFLOAT3 pad;
+};
+
+std::array<XMFLOAT4, 7> colors = 
+{
+	XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),
+	XMFLOAT4(0.0f, 0.2f, 0.0f, 1.0f),
+	XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
+	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
+	XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f),
+	XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 };
 
 class OverdrawStencilApp : public D3DApp

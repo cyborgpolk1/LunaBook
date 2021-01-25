@@ -181,11 +181,11 @@ void OverdrawStencilApp::DrawScene()
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	float blendFactors[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	//md3dImmediateContext->OMSetBlendState(mNoRenderTargetWriteBS, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetBlendState(mNoRenderTargetWriteBS, blendFactors, 0xffffffff);
 	md3dImmediateContext->OMSetDepthStencilState(mRenderToStencilDSS, 0);
 	drawToStencil();
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
-	//md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 
 	//
 	// Draw Overdraw Quads
@@ -197,27 +197,23 @@ void OverdrawStencilApp::DrawScene()
 	UINT offset = 0;
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mQuadVB, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mQuadIB, DXGI_FORMAT_R32_UINT, 0);
-
-	XMMATRIX view = XMLoadFloat4x4(&mView);
-	XMMATRIX proj = XMLoadFloat4x4(&mProj);
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HR(md3dImmediateContext->Map(mPerQuadBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	PerQuadBuffer* quadDataPtr = (PerQuadBuffer*)mappedResource.pData;
-	quadDataPtr->WorldViewProj = XMMatrixIdentity();
-
-	md3dImmediateContext->Unmap(mPerQuadBuffer, 0);
-
 	md3dImmediateContext->VSSetShader(mQuadVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mQuadPS, 0, 0);
-	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mPerQuadBuffer);
 
-	md3dImmediateContext->OMSetDepthStencilState(mRenderOverdrawDSS, 1);
-	md3dImmediateContext->DrawIndexed(mQuadIndexCount, 0, 0);
+	for (UINT i = 0; i < colors.size(); ++i) {
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		HR(md3dImmediateContext->Map(mPerQuadBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+		PerQuadBuffer* quadDataPtr = (PerQuadBuffer*)mappedResource.pData;
+		quadDataPtr->Color = colors[i];
+
+		md3dImmediateContext->Unmap(mPerQuadBuffer, 0);
+		md3dImmediateContext->VSSetConstantBuffers(0, 1, &mPerQuadBuffer);
+
+		md3dImmediateContext->OMSetDepthStencilState(mRenderOverdrawDSS, i);
+		md3dImmediateContext->DrawIndexed(mQuadIndexCount, 0, 0);
+	}
 	md3dImmediateContext->OMSetDepthStencilState(0, 0);
-
-
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -341,14 +337,14 @@ void OverdrawStencilApp::drawToStencil()
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
 	float blendFactors[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	//md3dImmediateContext->OMSetBlendState(mTransparentBlend, blendFactors, 0xfffffff);
+	md3dImmediateContext->OMSetBlendState(mTransparentBlend, blendFactors, 0xfffffff);
 
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
 	md3dImmediateContext->DrawIndexed(3 * mWaves.TriangleCount(), 0, 0);
 
-	//md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
+	md3dImmediateContext->OMSetBlendState(mNoRenderTargetWriteBS, blendFactors, 0xffffffff);
 }
 
 void OverdrawStencilApp::OnMouseDown(WPARAM btnState, int x, int y)
@@ -407,7 +403,6 @@ void OverdrawStencilApp::BuildQuadGeometryBuffers()
 	for (UINT i = 0; i < quad.Vertices.size(); ++i)
 	{
 		vertices[i].Pos = quad.Vertices[i].Position;
-		vertices[i].Color = (XMFLOAT4)Colors::Red;
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -605,11 +600,10 @@ void OverdrawStencilApp::BuildFX()
 	D3D11_INPUT_ELEMENT_DESC quadDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	CreateShader(&mQuadVS, ExePath().append(L"../../../Shaders/colorVS.hlsl").c_str(), "main", 0, &mQuadLayout, quadDesc, 2);
-	CreateShader(&mQuadPS, ExePath().append(L"../../../Shaders/colorPS.hlsl").c_str(), "main", 0);
+	CreateShader(&mQuadVS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "VS", 0, &mQuadLayout, quadDesc, 2);
+	CreateShader(&mQuadPS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "PS", 0);
 
 
 	// Create matrix buffer
