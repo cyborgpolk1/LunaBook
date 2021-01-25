@@ -143,6 +143,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OverdrawStencil", "Source\C
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OverdrawBlend", "Source\CH10\OverdrawBlend\OverdrawBlend.vcxproj", "{035EBA46-0C1E-4031-A134-377C9093E47E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoltCylinder", "Source\CH10\BoltCylinder\BoltCylinder.vcxproj", "{750924F7-F356-4196-B4C0-5CCBCD209046}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -431,6 +433,14 @@ Global
 		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x64.Build.0 = Release|x64
 		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x86.ActiveCfg = Release|Win32
 		{035EBA46-0C1E-4031-A134-377C9093E47E}.Release|x86.Build.0 = Release|Win32
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Debug|x64.ActiveCfg = Debug|x64
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Debug|x64.Build.0 = Debug|x64
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Debug|x86.ActiveCfg = Debug|Win32
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Debug|x86.Build.0 = Debug|Win32
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Release|x64.ActiveCfg = Release|x64
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Release|x64.Build.0 = Release|x64
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Release|x86.ActiveCfg = Release|Win32
+		{750924F7-F356-4196-B4C0-5CCBCD209046}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -470,6 +480,7 @@ Global
 		{D957017F-DFFA-403C-ACFB-D462E5901254} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 		{68AFD10F-3BC7-40F3-8354-6D12BD8C54AA} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 		{035EBA46-0C1E-4031-A134-377C9093E47E} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
+		{750924F7-F356-4196-B4C0-5CCBCD209046} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
