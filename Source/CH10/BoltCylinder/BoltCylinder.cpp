@@ -423,9 +423,12 @@ void BoltDemo::BuildCylinderGeometryBuffers()
 	GeometryGenerator::MeshData cyl;
 	GeometryGenerator geoGen;
 
-	geoGen.CreateCylinder(1.0f, 1.0f, 1.0f, 20, 4, cyl);
+	UINT slice = 20;
+	UINT stack = 4;
 
-	mCylIndexCount = 20 * 4 * 6;
+	geoGen.CreateCylinder(1.0f, 1.0f, 1.0f, slice, stack, cyl);
+
+	mCylIndexCount = slice * stack * 6;
 
 	std::vector<Vertex> vertices(cyl.Vertices.size());
 	for (size_t i = 0; i < vertices.size(); ++i)
