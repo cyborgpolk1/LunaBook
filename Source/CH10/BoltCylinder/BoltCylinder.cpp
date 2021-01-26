@@ -3,16 +3,21 @@
 #include "GeometryGenerator.h"
 #include "MathHelper.h"
 #include "Waves.h"
+#include "WICTextureLoader.h"
 #include <vector>
+#include <string>
+#include <sstream>
 
 D3DMAIN(BoltDemo);
 
 BoltDemo::BoltDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mLandVB(0), mLandIB(0), mWavesVB(0), mWavesIB(0), mCylVB(0), mCylIB(0),
 	mGridIndexCount(0), mCylIndexCount(0), mVS(0), mPS(0), mInputLayout(0),
-	mPerObjectBuffer(0), mPerFrameBuffer(0), mNoCullRS(0), 
+	mPerObjectBuffer(0), mPerFrameBuffer(0), 
+	mNoCullRS(0), mTransparentBlend(0), mAdditiveBlend(0), mNoWriteDSS(0),
+	mLandTexture(0), mWaterTexture(0), mCurrentFrame(0),
 	mTheta(1.5f*MathHelper::Pi), mPhi(0.1f*MathHelper::Pi), mRadius(200.0f), 
-	mWaterTexOffset(0.0f, 0.0f), mEyePosW(0.0f, 0.0f, 0.0f), mTransparentBlend(0)
+	mWaterTexOffset(0.0f, 0.0f), mEyePosW(0.0f, 0.0f, 0.0f)
 {
 	mMainWndCaption = L"Bolt Demo";
 
@@ -50,6 +55,13 @@ BoltDemo::BoltDemo(HINSTANCE hInstance)
 	mWavesMat.Ambient = XMFLOAT4(0.137f, 0.42f, 0.556f, 1.0f);
 	mWavesMat.Diffuse = XMFLOAT4(0.137f, 0.42f, 0.556f, 0.5f);
 	mWavesMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 96.0f);
+
+	mBoltMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mBoltMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mBoltMat.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 16.0f);
+
+	for (UINT i = 0; i < sizeof(mBoltTexture) / sizeof(mBoltTexture[0]); ++i)
+		mBoltTexture[i] = 0;
 }
 
 BoltDemo::~BoltDemo()
@@ -67,9 +79,15 @@ BoltDemo::~BoltDemo()
 	ReleaseCOM(mPerFrameBuffer);
 	ReleaseCOM(mLandTexture);
 	ReleaseCOM(mWaterTexture);
+	
+	for (UINT i = 0; i < sizeof(mBoltTexture) / sizeof(mBoltTexture[0]); ++i)
+		ReleaseCOM(mBoltTexture[i]);
+
 	ReleaseCOM(mSampleState);
 	ReleaseCOM(mNoCullRS);
 	ReleaseCOM(mTransparentBlend);
+	ReleaseCOM(mAdditiveBlend);
+	ReleaseCOM(mNoWriteDSS);
 }
 
 bool BoltDemo::Init()
@@ -107,6 +125,20 @@ bool BoltDemo::Init()
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
 	HR(md3dDevice->CreateBlendState(&blendDesc, &mTransparentBlend));
+
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+
+	HR(md3dDevice->CreateBlendState(&blendDesc, &mAdditiveBlend));
+
+	D3D11_DEPTH_STENCIL_DESC noWriteDesc = {0};
+	noWriteDesc.DepthEnable = true;
+	noWriteDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	noWriteDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	noWriteDesc.StencilEnable = false;
+
+	HR(md3dDevice->CreateDepthStencilState(&noWriteDesc, &mNoWriteDSS));
 
 	return true;
 }
@@ -176,6 +208,13 @@ void BoltDemo::UpdateScene(float dt)
 	}
 
 	md3dImmediateContext->Unmap(mWavesVB, 0);
+	
+	static float bolt_base = 0.0f;
+	if ((mTimer.TotalTime() - bolt_base) >= 1.0f / 15.0f)
+	{
+		bolt_base += 1.0f / 15.0f;
+		mCurrentFrame = (mCurrentFrame + 1) % (sizeof(mBoltTexture) / sizeof(mBoltTexture[0]));
+	}
 }
 
 void BoltDemo::DrawScene()
@@ -255,19 +294,27 @@ void BoltDemo::DrawScene()
 	dataPtr->World = XMMatrixTranspose(world);
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
-	dataPtr->TextureTransform = XMMatrixIdentity();
-	dataPtr->Mat = mLandMat;
+	dataPtr->TextureTransform = XMMatrixScaling(1.0f, 2.0f, 0.0f);
+	dataPtr->Mat = mBoltMat;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 
+	md3dImmediateContext->PSSetShaderResources(0, 1, &mBoltTexture[mCurrentFrame]);
+	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
+
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
+	float blendFactors[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	md3dImmediateContext->RSSetState(mNoCullRS);
+	md3dImmediateContext->OMSetDepthStencilState(mNoWriteDSS, 0);
+	md3dImmediateContext->OMSetBlendState(mAdditiveBlend, blendFactors, 0xffffffff);
 	md3dImmediateContext->DrawIndexed(mCylIndexCount, 0, 0);
 	md3dImmediateContext->RSSetState(0);
+	md3dImmediateContext->OMSetDepthStencilState(0, 0);
+	md3dImmediateContext->OMSetBlendState(0, blendFactors, 0xffffffff);
 
 	// WATER
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
@@ -293,7 +340,6 @@ void BoltDemo::DrawScene()
 	md3dImmediateContext->PSSetShaderResources(0, 1, &mWaterTexture);
 	md3dImmediateContext->PSSetSamplers(0, 1, &mSampleState);
 
-	float blendFactors[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	md3dImmediateContext->OMSetBlendState(mTransparentBlend, blendFactors, 0xfffffff);
 
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
@@ -518,7 +564,7 @@ void BoltDemo::BuildFX()
 
 	D3D_SHADER_MACRO basicEffectDefines[] = {
 		{ "CLIP", "1" },
-		{"FOG", "1"},
+		//{"FOG", "1"},
 		{ 0, 0 }
 	};
 
@@ -549,11 +595,27 @@ void BoltDemo::BuildFX()
 
 void BoltDemo::BuildTex()
 {
-	ID3D11Resource* textureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/grass.dds").c_str(), &textureResource, &mLandTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/grass.dds").c_str(), nullptr, &mLandTexture));
+	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/water1.dds").c_str(), nullptr, &mWaterTexture));
 
-	ID3D11Resource* waterTextureResource;
-	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/water1.dds").c_str(), &waterTextureResource, &mWaterTexture));
+	std::wstring filename(ExePath().append(L"../../../Textures/BoltAnim/Bolt"));
+
+	for (UINT i = 0; i < sizeof(mBoltTexture) / sizeof(mBoltTexture[0]); ++i)
+	{
+		std::wstringstream ss;
+		ss << filename;
+
+		if ((i+1) % 10 == i+1)
+			ss << L"00";
+		else if ((i+1) % 100 == i+1)
+			ss << L"0";
+
+		ss << i+1;
+		ss << L".bmp";
+
+		HR(CreateWICTextureFromFile(md3dDevice, ss.str().c_str(), nullptr, &mBoltTexture[i]));
+	}
+
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -571,7 +633,4 @@ void BoltDemo::BuildTex()
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	HR(md3dDevice->CreateSamplerState(&samplerDesc, &mSampleState));
-
-	ReleaseCOM(textureResource);
-	ReleaseCOM(waterTextureResource);
 }

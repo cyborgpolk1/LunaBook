@@ -5,6 +5,7 @@
 #include "Waves.h"
 #include "LightHelper.h"
 #include "DDSTextureLoader.h"
+#include <array>
 
 struct Vertex
 {
@@ -76,11 +77,18 @@ private:
 
 	ID3D11RasterizerState* mNoCullRS;
 
+
 	ID3D11ShaderResourceView* mLandTexture;
 	ID3D11ShaderResourceView* mWaterTexture;
+	ID3D11ShaderResourceView* mBoltTexture[60];
 	ID3D11SamplerState* mSampleState;
 
+	UINT mCurrentFrame;
+
 	ID3D11BlendState* mTransparentBlend;
+	ID3D11BlendState* mAdditiveBlend;
+
+	ID3D11DepthStencilState* mNoWriteDSS;
 
 	XMFLOAT4X4 mGridWorld;
 	XMFLOAT4X4 mWavesWorld;
@@ -105,6 +113,7 @@ private:
 
 	Material mLandMat;
 	Material mWavesMat;
+	Material mBoltMat;
 
 	XMFLOAT3 mEyePosW;
 };
