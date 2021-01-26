@@ -265,7 +265,9 @@ void BoltDemo::DrawScene()
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
+	md3dImmediateContext->RSSetState(mNoCullRS);
 	md3dImmediateContext->DrawIndexed(mCylIndexCount, 0, 0);
+	md3dImmediateContext->RSSetState(0);
 
 	// WATER
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mWavesVB, &stride, &offset);
@@ -423,7 +425,7 @@ void BoltDemo::BuildCylinderGeometryBuffers()
 
 	geoGen.CreateCylinder(1.0f, 1.0f, 1.0f, 20, 4, cyl);
 
-	mCylIndexCount = (UINT)cyl.Indices.size();
+	mCylIndexCount = 20 * 4 * 6;
 
 	std::vector<Vertex> vertices(cyl.Vertices.size());
 	for (size_t i = 0; i < vertices.size(); ++i)
