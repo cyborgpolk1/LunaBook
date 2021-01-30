@@ -403,7 +403,7 @@ bool D3DApp::InitDirect3D()
 	if (mEnable4xMsaa)
 	{
 		sd.SampleDesc.Count = 4;
-		sd.SampleDesc.Quality = m4xMsaaQuality - 1;
+		sd.SampleDesc.Quality = m4xMsaaQuality;
 	}
 	else
 	{
