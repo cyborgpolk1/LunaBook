@@ -21,13 +21,18 @@ cbuffer cbPerObject : register(b1)
 	Material gMaterial;
 };
 
-static const float2 gTexC[4] =
-	{
-		float2(0.0f, 1.0f),
+cbuffer cbFixed
+{
+    static const float2 gTexC[4] =
+    {
+        float2(0.0f, 1.0f),
 		float2(0.0f, 0.0f),
 		float2(1.0f, 1.0f),
 		float2(1.0f, 0.0f)
-	};
+    };
+};
+
+
 
 Texture2DArray gTreeMapArray : register(t0);
 
