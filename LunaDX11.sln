@@ -151,6 +151,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TreeBillboard", "Source\CH1
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CircleToCylinder", "Source\CH11\CircleToCylinder\CircleToCylinder.vcxproj", "{B3136228-37A3-401E-8F09-EF8C0DF828F4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SubdivideIcosahedron", "Source\CH11\SubdivideIcosahedron\SubdivideIcosahedron.vcxproj", "{DF23498B-0690-4BA5-AB3A-8849D277C098}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -463,6 +465,14 @@ Global
 		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x64.Build.0 = Release|x64
 		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x86.ActiveCfg = Release|Win32
 		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x86.Build.0 = Release|Win32
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Debug|x64.ActiveCfg = Debug|x64
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Debug|x64.Build.0 = Debug|x64
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Debug|x86.ActiveCfg = Debug|Win32
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Debug|x86.Build.0 = Debug|Win32
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x64.ActiveCfg = Release|x64
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x64.Build.0 = Release|x64
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x86.ActiveCfg = Release|Win32
+		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -505,6 +515,7 @@ Global
 		{750924F7-F356-4196-B4C0-5CCBCD209046} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 		{FAF94384-3F42-4023-B682-FB6EB0DA221E} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 		{B3136228-37A3-401E-8F09-EF8C0DF828F4} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
+		{DF23498B-0690-4BA5-AB3A-8849D277C098} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
