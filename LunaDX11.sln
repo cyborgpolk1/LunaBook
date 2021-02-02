@@ -65,6 +65,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\BasicTexture.hlsl = Shaders\BasicTexture.hlsl
 		Shaders\BasicTextureAndLighting.hlsl = Shaders\BasicTextureAndLighting.hlsl
 		Shaders\Billboard.hlsl = Shaders\Billboard.hlsl
+		Shaders\CircleToCylinder.hlsl = Shaders\CircleToCylinder.hlsl
 		Shaders\colorPS.hlsl = Shaders\colorPS.hlsl
 		Shaders\colorVS.hlsl = Shaders\colorVS.hlsl
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
@@ -147,6 +148,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoltCylinder", "Source\CH10\BoltCylinder\BoltCylinder.vcxproj", "{750924F7-F356-4196-B4C0-5CCBCD209046}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TreeBillboard", "Source\CH11\TreeBillboard\TreeBillboard.vcxproj", "{FAF94384-3F42-4023-B682-FB6EB0DA221E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CircleToCylinder", "Source\CH11\CircleToCylinder\CircleToCylinder.vcxproj", "{B3136228-37A3-401E-8F09-EF8C0DF828F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -452,6 +455,14 @@ Global
 		{FAF94384-3F42-4023-B682-FB6EB0DA221E}.Release|x64.Build.0 = Release|x64
 		{FAF94384-3F42-4023-B682-FB6EB0DA221E}.Release|x86.ActiveCfg = Release|Win32
 		{FAF94384-3F42-4023-B682-FB6EB0DA221E}.Release|x86.Build.0 = Release|Win32
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Debug|x64.ActiveCfg = Debug|x64
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Debug|x64.Build.0 = Debug|x64
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Debug|x86.ActiveCfg = Debug|Win32
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Debug|x86.Build.0 = Debug|Win32
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x64.ActiveCfg = Release|x64
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x64.Build.0 = Release|x64
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x86.ActiveCfg = Release|Win32
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -493,6 +504,7 @@ Global
 		{035EBA46-0C1E-4031-A134-377C9093E47E} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 		{750924F7-F356-4196-B4C0-5CCBCD209046} = {B6345CD9-6C4F-42EB-8223-0852ADC3962D}
 		{FAF94384-3F42-4023-B682-FB6EB0DA221E} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
+		{B3136228-37A3-401E-8F09-EF8C0DF828F4} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
