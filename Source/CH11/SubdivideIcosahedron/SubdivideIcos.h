@@ -2,6 +2,7 @@
 
 #include "CommonLibs.h"
 #include "D3DApp.h"
+#include <array>
 
 struct Vertex
 {
@@ -31,6 +32,7 @@ public:
 private:
 	void BuildIcosahedron();
 	void BuildFX();
+	void BuildViewports();
 
 private:
 	ID3D11Buffer* mIcosVB;
@@ -47,7 +49,10 @@ private:
 	ID3D11Buffer* mConstantBuffer;
 
 	XMFLOAT4X4 mView;
+	XMFLOAT4X4 mNoZoomView;
 	XMFLOAT4X4 mProj;
+
+	std::array<D3D11_VIEWPORT, 2> mViewports;
 
 	float mTheta;
 	float mPhi;
