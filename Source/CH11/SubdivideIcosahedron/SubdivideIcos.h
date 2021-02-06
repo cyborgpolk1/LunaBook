@@ -54,6 +54,8 @@ private:
 
 	std::array<D3D11_VIEWPORT, 2> mViewports;
 
+	ID3D11RasterizerState* mWireframeRS;
+
 	float mTheta;
 	float mPhi;
 	float mRadius;

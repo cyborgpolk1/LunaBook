@@ -7,7 +7,7 @@ D3DMAIN(SubdivideIcosahedron);
 
 SubdivideIcosahedron::SubdivideIcosahedron(HINSTANCE hInstance)
 	: D3DApp(hInstance), mIcosVB(0), mIcosIB(0), mIcosIndexCount(0),
-	mVS(0), mGS(0), mPS(0), mInputLayout(0), mConstantBuffer(0),
+	mVS(0), mGS(0), mPS(0), mInputLayout(0), mConstantBuffer(0), mWireframeRS(0),
 	mTheta(1.5f*MathHelper::Pi), mPhi(0.25f*MathHelper::Pi), mRadius(5.0f)
 {
 	mMainWndCaption = L"Subdivide Icosahedron";
@@ -31,6 +31,7 @@ SubdivideIcosahedron::~SubdivideIcosahedron()
 	ReleaseCOM(mPS);
 	ReleaseCOM(mInputLayout);
 	ReleaseCOM(mConstantBuffer);
+	ReleaseCOM(mWireframeRS);
 }
 
 bool SubdivideIcosahedron::Init()
@@ -41,6 +42,10 @@ bool SubdivideIcosahedron::Init()
 	BuildIcosahedron();
 	BuildFX();
 	BuildViewports();
+
+	D3D11_RASTERIZER_DESC wireframeDesc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
+	wireframeDesc.FillMode = D3D11_FILL_WIREFRAME;
+	HR(md3dDevice->CreateRasterizerState(&wireframeDesc, &mWireframeRS));
 
 	return true;
 }
@@ -99,9 +104,10 @@ void SubdivideIcosahedron::DrawScene()
 	dataPtr->ViewProj = XMMatrixTranspose(view * proj);
 
 	md3dImmediateContext->Unmap(mConstantBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mConstantBuffer);
+	md3dImmediateContext->GSSetConstantBuffers(0, 1, &mConstantBuffer);
 
 	md3dImmediateContext->VSSetShader(mVS, 0, 0);
+	md3dImmediateContext->GSSetShader(mGS, 0, 0);
 	md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
 	md3dImmediateContext->RSSetViewports(1, &mViewports[0]);
@@ -114,10 +120,13 @@ void SubdivideIcosahedron::DrawScene()
 	dataPtr->ViewProj = XMMatrixTranspose(noZoomView * proj);
 
 	md3dImmediateContext->Unmap(mConstantBuffer, 0);
-	md3dImmediateContext->VSSetConstantBuffers(0, 1, &mConstantBuffer);
+	md3dImmediateContext->GSSetConstantBuffers(0, 1, &mConstantBuffer);
 
 	md3dImmediateContext->RSSetViewports(1, &mViewports[1]);
+	md3dImmediateContext->RSSetState(mWireframeRS);
 	md3dImmediateContext->DrawIndexed(mIcosIndexCount, 0, 0);
+
+	md3dImmediateContext->RSSetState(0);
 
 	HR(mSwapChain->Present(0, 0));
 }
@@ -221,6 +230,7 @@ void SubdivideIcosahedron::BuildFX()
 	};
 
 	CreateShader(&mVS, ExePath().append(L"../../../Shaders/SubdivideIcosahedron.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 1);
+	CreateShader(&mGS, ExePath().append(L"../../../Shaders/SubdivideIcosahedron.hlsl").c_str(), "GS", 0);
 	CreateShader(&mPS, ExePath().append(L"../../../Shaders/SubdivideIcosahedron.hlsl").c_str(), "PS", 0);
 
 	D3D11_BUFFER_DESC constantDesc;
