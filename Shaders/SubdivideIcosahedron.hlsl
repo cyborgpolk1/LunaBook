@@ -1,3 +1,18 @@
+///////////////////////////////////////////////////////////////////
+// PLEASE READ
+//
+// The way I wrote this shader is complicated just to test
+// the limits of what I can do. It is not meant to be a proper
+// way to do this. I just wanted to limit the amount of hardcoded 
+// values.
+//
+// You'll definitely get warnings in Debug mode.
+//
+// Then again, Subdivision, especially without Stream Out,
+// really shouldn't be done in the Geometry Shader in the first
+// place.
+///////////////////////////////////////////////////////////////////
+
 cbuffer PerObjectBuffer
 {
     float4x4 gWorldView;
@@ -14,6 +29,7 @@ struct VertexOut
 	float3 Pos : POSITION;
 };
 
+// Only gonna do position. Won't bother with lighting.
 struct GeoOut
 {
     float4 Pos : SV_POSITION;
@@ -32,6 +48,7 @@ void Subdivide(VertexOut inVerts[3], out VertexOut outVerts[6])
 {
     VertexOut m[3];
     
+    // Only gonna do position. Won't bother with lighting.
     m[0].Pos = 0.5f * (inVerts[0].Pos + inVerts[1].Pos);
     m[1].Pos = 0.5f * (inVerts[1].Pos + inVerts[2].Pos);
     m[2].Pos = 0.5f * (inVerts[2].Pos + inVerts[0].Pos);
@@ -65,6 +82,10 @@ void OutputSubdivision(VertexOut v[15], int numSubdivisions, inout TriangleStrea
     [loop]
     for (int strip = 0; strip < pow(2, numSubdivisions); numInStrip += 2, ++strip)
     {
+        // Since we are building a strip, we just alternate between
+        // the bottom and top rows of the strip.
+        // The values will be in the correct place for the next strip
+        // when done with current one. See comments in Subdivide().
         triStream.Append(gout[bottomIndex]);
         ++bottomIndex;
 
@@ -91,22 +112,28 @@ void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> stream)
     VertexOut v[6];
     VertexOut bigv[15];
     
+    // Otherwise it will complain
+    int i = 0;
+    
     [unroll]
-    for (int k = 0; k < 15; ++k)
+    for (i = 0; i < 15; ++i)
     {
-        bigv[k].Pos = float3(1.0f, 0.0f, 0.0f);
+        bigv[i].Pos = float3(1.0f, 0.0f, 0.0f);
     }
     
+    // Probably better to do this in the CPU
     float d = length(mul(float4(0.0, 0.0, 0.0, 1.0f), gWorldView));
     
+    // Lol. Just to preserve a switch instead of using an if
     int numSubdivisions = 2 - (step(10, d) + step(20, d));
     
+    // Ugh
     [call]
     switch (numSubdivisions)
     {
         case 0:
             [unroll]
-            for (int i = 0; i < 3; ++i)
+            for (i = 0; i < 3; ++i)
             {
                 bigv[i] = gin[i];
             }
@@ -115,19 +142,23 @@ void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> stream)
         case 1:
             Subdivide(gin, v);
             [unroll]
-            for (int j = 0; j < 6; ++j)
+            for (i = 0; i < 6; ++i)
             {
-                bigv[j] = v[j];
+                bigv[i] = v[i];
             }
             break;
         
         case 2:
             Subdivide(gin, v);
     
+            // No tri2 because we don't need to subdivide
+            // the middle, "upside-down" triangle from
+            // the first subdivision.
             VertexOut tri0[3] = { v[1], v[0], v[2] };
             VertexOut tri1[3] = { v[3], v[1], v[4] };
             VertexOut tri3[3] = { v[4], v[2], v[5] };
     
+            // Make sure vertices are in top-to-bottom order
             Subdivide(tri0, v);
             bigv[0] = v[0];
             bigv[1] = v[1];
@@ -148,6 +179,16 @@ void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> stream)
             bigv[9] = v[2];
             bigv[13] = v[4];
             bigv[14] = v[5];
+            break;
+        
+        // Shouldn't reach here. Coarse mesh will do
+        // a better job of indicating an error.
+        default:
+            [unroll]
+            for (i = 0; i < 3; ++i)
+            {
+                bigv[i] = gin[i];
+            }
             break;
     }
     
