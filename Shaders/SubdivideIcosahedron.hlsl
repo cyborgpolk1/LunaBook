@@ -46,7 +46,7 @@ void Subdivide(VertexOut inVerts[3], out VertexOut outVerts[6])
     outVerts[5] = inVerts[2];
 }
 
-void OutputSubdivision(VertexOut v[15], inout TriangleStream<GeoOut> triStream)
+void OutputSubdivision(VertexOut v[15], int numSubdivisions, inout TriangleStream<GeoOut> triStream)
 {
     GeoOut gout[15];
     float4 currentColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -63,7 +63,9 @@ void OutputSubdivision(VertexOut v[15], inout TriangleStream<GeoOut> triStream)
     // There are 2^numSubdivisions strips
     int topIndex = 0;
     int bottomIndex = 1;
-    for (unsigned int numInStrip = 1; bottomIndex < 15; numInStrip += 2)
+    unsigned int numInStrip = 1;
+    [unroll(4)]
+    for (int strip = 0; strip < pow(2, numSubdivisions); numInStrip += 2, ++strip)
     {
         gout[bottomIndex].Color = currentColor;
         currentColor = currentColor.brga;
@@ -75,6 +77,7 @@ void OutputSubdivision(VertexOut v[15], inout TriangleStream<GeoOut> triStream)
         triStream.Append(gout[topIndex]);
         ++topIndex;
         
+        [unroll(7)]
         for (unsigned int j = 0; j < numInStrip; ++j)
         {
             int currentIndex = (1 - j % 2) * bottomIndex + (j % 2) * topIndex;
@@ -94,36 +97,61 @@ void OutputSubdivision(VertexOut v[15], inout TriangleStream<GeoOut> triStream)
 void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> stream)
 {
     VertexOut v[6];
-    Subdivide(gin, v);
-    
-    VertexOut tri0[3] = { v[1], v[0], v[2] };
-    VertexOut tri1[3] = { v[3], v[1], v[4] };
-    VertexOut tri3[3] = { v[4], v[2], v[5] };
-    
     VertexOut bigv[15];
     
-    Subdivide(tri0, v);
-    bigv[0] = v[0];
-    bigv[1] = v[1];
-    bigv[2] = v[2];
-    bigv[3] = v[3];
-    bigv[4] = v[4];
-    bigv[5] = v[5];
+    int numSubdivisions = 1;
     
-    Subdivide(tri1, v);
-    bigv[6] = v[1];
-    bigv[7] = v[2];
-    bigv[10] = v[3];
-    bigv[11] = v[4];
-    bigv[12] = v[5];
+    [call]
+    switch (numSubdivisions)
+    {
+        case 0:
+            [unroll]
+            for (int i = 0; i < 3; ++i)
+            {
+                bigv[i] = gin[i];
+            }
+            break;
+        
+        case 1:
+            Subdivide(gin, v);
+            [unroll]
+            for (int j = 0; j < 6; ++j)
+            {
+                bigv[j] = v[j];
+            }
+            break;
+        
+        case 2:
+            Subdivide(gin, v);
     
-    Subdivide(tri3, v);
-    bigv[8] = v[1];
-    bigv[9] = v[2];
-    bigv[13] = v[4];
-    bigv[14] = v[5];
+            VertexOut tri0[3] = { v[1], v[0], v[2] };
+            VertexOut tri1[3] = { v[3], v[1], v[4] };
+            VertexOut tri3[3] = { v[4], v[2], v[5] };
     
-    OutputSubdivision(bigv, stream);
+            Subdivide(tri0, v);
+            bigv[0] = v[0];
+            bigv[1] = v[1];
+            bigv[2] = v[2];
+            bigv[3] = v[3];
+            bigv[4] = v[4];
+            bigv[5] = v[5];
+    
+            Subdivide(tri1, v);
+            bigv[6] = v[1];
+            bigv[7] = v[2];
+            bigv[10] = v[3];
+            bigv[11] = v[4];
+            bigv[12] = v[5];
+    
+            Subdivide(tri3, v);
+            bigv[8] = v[1];
+            bigv[9] = v[2];
+            bigv[13] = v[4];
+            bigv[14] = v[5];
+            break;
+    }
+    
+    OutputSubdivision(bigv, numSubdivisions, stream);
 }
 
 float4 PS(GeoOut pin) : SV_TARGET
