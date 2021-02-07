@@ -101,6 +101,7 @@ void SubdivideIcosahedron::DrawScene()
 	HR(md3dImmediateContext->Map(mConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
 	ConstantBuffer* dataPtr = (ConstantBuffer*)mappedResource.pData;
+	dataPtr->View = XMMatrixTranspose(view);
 	dataPtr->ViewProj = XMMatrixTranspose(view * proj);
 
 	md3dImmediateContext->Unmap(mConstantBuffer, 0);
@@ -117,6 +118,7 @@ void SubdivideIcosahedron::DrawScene()
 	HR(md3dImmediateContext->Map(mConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
 	dataPtr = (ConstantBuffer*)mappedResource.pData;
+	dataPtr->View = XMMatrixTranspose(view);
 	dataPtr->ViewProj = XMMatrixTranspose(noZoomView * proj);
 
 	md3dImmediateContext->Unmap(mConstantBuffer, 0);
@@ -169,7 +171,7 @@ void SubdivideIcosahedron::OnMouseMove(WPARAM btnState, int x, int y)
 		mRadius += dx - dy;
 
 		// Restrict the radius
-		mRadius = MathHelper::Clamp(mRadius, 3.0f, 15.0f);
+		mRadius = MathHelper::Clamp(mRadius, 3.0f, 25.0f);
 	}
 
 	mLastMousePos.x = x;

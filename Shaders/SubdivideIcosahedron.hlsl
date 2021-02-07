@@ -1,6 +1,6 @@
 cbuffer PerObjectBuffer
 {
-    //float4x4 gWorldView;
+    float4x4 gWorldView;
 	float4x4 gWorldViewProj;
 };
 
@@ -17,7 +17,6 @@ struct VertexOut
 struct GeoOut
 {
     float4 Pos : SV_POSITION;
-    float4 Color : COLOR;
 };
 
 VertexOut VS(VertexIn vin)
@@ -55,7 +54,6 @@ void OutputSubdivision(VertexOut v[15], int numSubdivisions, inout TriangleStrea
     for (int i = 0; i < 15; ++i)
     {
         gout[i].Pos = mul(float4(normalize(v[i].Pos), 1.0f), gWorldViewProj);
-        gout[i].Color = currentColor;
     }
     
     // Start with the top strip of size 1.
@@ -64,25 +62,19 @@ void OutputSubdivision(VertexOut v[15], int numSubdivisions, inout TriangleStrea
     int topIndex = 0;
     int bottomIndex = 1;
     unsigned int numInStrip = 1;
-    [unroll(4)]
+    [loop]
     for (int strip = 0; strip < pow(2, numSubdivisions); numInStrip += 2, ++strip)
     {
-        gout[bottomIndex].Color = currentColor;
-        currentColor = currentColor.brga;
         triStream.Append(gout[bottomIndex]);
         ++bottomIndex;
-        
-        gout[topIndex].Color = currentColor;
-        currentColor = currentColor.brga;
+
         triStream.Append(gout[topIndex]);
         ++topIndex;
         
-        [unroll(7)]
+        [loop]
         for (unsigned int j = 0; j < numInStrip; ++j)
         {
             int currentIndex = (1 - j % 2) * bottomIndex + (j % 2) * topIndex;
-            gout[currentIndex].Color = currentColor;
-            currentColor = currentColor.brga;
             triStream.Append(gout[currentIndex]);
             bottomIndex = (1 - j % 2) * (bottomIndex + 1) + (j % 2) * bottomIndex;
             topIndex = (1 - j % 2) * topIndex + (j % 2) * (topIndex + 1);
@@ -99,7 +91,15 @@ void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> stream)
     VertexOut v[6];
     VertexOut bigv[15];
     
-    int numSubdivisions = 1;
+    [unroll]
+    for (int k = 0; k < 15; ++k)
+    {
+        bigv[k].Pos = float3(1.0f, 0.0f, 0.0f);
+    }
+    
+    float d = length(mul(float4(0.0, 0.0, 0.0, 1.0f), gWorldView));
+    
+    int numSubdivisions = 2 - (step(10, d) + step(20, d));
     
     [call]
     switch (numSubdivisions)
@@ -156,5 +156,5 @@ void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> stream)
 
 float4 PS(GeoOut pin) : SV_TARGET
 {
-    return pin.Color;
+    return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
