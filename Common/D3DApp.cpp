@@ -574,6 +574,15 @@ void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR 
 	ReleaseCOM(compiledShader);
 }
 
+void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
+{
+    ID3DBlob* compiledShader = CompileShader(filename, entry, "vs_5_0", defines);
+
+    HR(md3dDevice->CreateVertexShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, shader));
+
+    ReleaseCOM(compiledShader);
+}
+
 void D3DApp::CreateShader(ID3D11PixelShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
 	ID3DBlob* compiledShader = CompileShader(filename, entry, "ps_5_0", defines);

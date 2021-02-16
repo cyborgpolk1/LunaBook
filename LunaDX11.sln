@@ -72,6 +72,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\flubberCubeVS.hlsl = Shaders\flubberCubeVS.hlsl
 		Shaders\LightHelper.hlsl = Shaders\LightHelper.hlsl
 		Shaders\Multitexture.hlsl = Shaders\Multitexture.hlsl
+		Shaders\NormalVisualization.hlsl = Shaders\NormalVisualization.hlsl
 		Shaders\OverdrawQuad.hlsl = Shaders\OverdrawQuad.hlsl
 		Shaders\SubdivideIcosahedron.hlsl = Shaders\SubdivideIcosahedron.hlsl
 		Shaders\ToonLighting.hlsl = Shaders\ToonLighting.hlsl
@@ -155,7 +156,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CircleToCylinder", "Source\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SubdivideIcosahedron", "Source\CH11\SubdivideIcosahedron\SubdivideIcosahedron.vcxproj", "{DF23498B-0690-4BA5-AB3A-8849D277C098}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Explosion", "Explosion\Explosion.vcxproj", "{21021586-7D7B-45AE-8B31-34C8DA1260CF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalVis", "Source\CH11\NormalVis\NormalVis.vcxproj", "{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Explosion", "Source\CH11\Explosion\Explosion.vcxproj", "{21021586-7D7B-45AE-8B31-34C8DA1260CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -477,6 +480,14 @@ Global
 		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x64.Build.0 = Release|x64
 		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x86.ActiveCfg = Release|Win32
 		{DF23498B-0690-4BA5-AB3A-8849D277C098}.Release|x86.Build.0 = Release|Win32
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Debug|x64.ActiveCfg = Debug|x64
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Debug|x64.Build.0 = Debug|x64
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Debug|x86.ActiveCfg = Debug|Win32
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Debug|x86.Build.0 = Debug|Win32
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Release|x64.ActiveCfg = Release|x64
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Release|x64.Build.0 = Release|x64
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Release|x86.ActiveCfg = Release|Win32
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31}.Release|x86.Build.0 = Release|Win32
 		{21021586-7D7B-45AE-8B31-34C8DA1260CF}.Debug|x64.ActiveCfg = Debug|x64
 		{21021586-7D7B-45AE-8B31-34C8DA1260CF}.Debug|x64.Build.0 = Debug|x64
 		{21021586-7D7B-45AE-8B31-34C8DA1260CF}.Debug|x86.ActiveCfg = Debug|Win32
@@ -528,6 +539,7 @@ Global
 		{FAF94384-3F42-4023-B682-FB6EB0DA221E} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 		{B3136228-37A3-401E-8F09-EF8C0DF828F4} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 		{DF23498B-0690-4BA5-AB3A-8849D277C098} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
+		{FD9CC10E-7D5B-459F-9752-B1B55B4F4C31} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 		{21021586-7D7B-45AE-8B31-34C8DA1260CF} = {7005A16D-13BA-4DE4-ABC0-3FF169B21FAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
