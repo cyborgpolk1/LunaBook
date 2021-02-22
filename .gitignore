@@ -21,3 +21,4 @@
 Common.lib
 *.VC.VC.opendb
 .vs/SwitchStartupProject/ActiveConfiguration.json
+OutputFiles/
