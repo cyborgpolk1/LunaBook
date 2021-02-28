@@ -1,5 +1,5 @@
 #include "BlurFilter.h"
-#include <d3dcompiler.h>
+#include "D3Dapp.h"
 #include <string>
 
 BlurFilter::BlurFilter()
@@ -87,18 +87,10 @@ void BlurFilter::Init(ID3D11Device* device, UINT width, UINT height, DXGI_FORMAT
 
     if (!mHorzCS || !mVertCS)
     {
-        wchar_t buffer[MAX_PATH];
-        GetModuleFileName(NULL, buffer, MAX_PATH);
-        std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
-        auto filename = std::wstring(buffer).substr(0, pos + 1).append(L"../../../Shaders/ComputeBlur.hlsl");
-        
-        ID3D10Blob* compiledShader = CompileShader(filename.c_str(), "HorzBlurCS", "cs_5_0", 0);
-        HR(device->CreateComputeShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &mHorzCS));
-        ReleaseCOM(compiledShader);
+        auto filename = ExePath().append(L"../../../Shaders/ComputeBlur.hlsl");   
 
-        compiledShader = CompileShader(filename.c_str(), "VertBlurCS", "cs_5_0", 0);
-        HR(device->CreateComputeShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &mVertCS));
-        ReleaseCOM(compiledShader);
+        CreateShader(device, &mHorzCS, filename.c_str(), "HorzBlurCS", 0);
+        CreateShader(device, &mVertCS, filename.c_str(), "VertBlurCS", 0);
     }
 }
 
@@ -134,37 +126,4 @@ void BlurFilter::BlurInPlace(ID3D11DeviceContext* dc,
     }
 
     dc->CSSetShader(0, 0, 0);
-}
-
-ID3DBlob* BlurFilter::CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR target, const D3D_SHADER_MACRO* defines)
-{
-    DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-    shaderFlags |= D3D10_SHADER_DEBUG;
-    shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-    ID3DBlob* compiledShader = 0;
-    ID3DBlob* compilationMsgs = 0;
-
-    HRESULT hr = D3DCompileFromFile(filename, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, entry, target, shaderFlags, 0, &compiledShader, &compilationMsgs);
-
-    // compilationMsgs can store errors or warnings.
-    if (compilationMsgs != 0)
-    {
-        wchar_t* error = new wchar_t[compilationMsgs->GetBufferSize() + 1];
-        size_t out;
-        mbstowcs_s(&out, error, compilationMsgs->GetBufferSize() + 1, (const char*)compilationMsgs->GetBufferPointer(), compilationMsgs->GetBufferSize());
-        MessageBox(0, error, 0, 0);
-    }
-
-    // Even if there are no compilationsMsgs, check to make sure there were no other errors.
-    if (FAILED(hr))
-    {
-        DXTrace(__FILEW__, (DWORD)__LINE__, hr, L"D3DCompileFromFile", true);
-    }
-
-    ReleaseCOM(compilationMsgs);
-
-    return compiledShader;
 }

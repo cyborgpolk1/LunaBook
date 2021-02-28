@@ -29,6 +29,4 @@ private:
 
     ID3D11ComputeShader* mHorzCS;
     ID3D11ComputeShader* mVertCS;
-
-    ID3DBlob* CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR target, const D3D_SHADER_MACRO* defines);
 };
