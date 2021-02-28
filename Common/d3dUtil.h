@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
 
 using namespace DirectX;
 
@@ -53,6 +54,18 @@ namespace Colors
 
 	XMGLOBALCONST XMVECTORF32 Silver = { 0.75f, 0.75f, 0.75f, 1.0f };
 	XMGLOBALCONST XMVECTORF32 LightSteelBlue = { 0.69f, 0.77f, 0.87f, 1.0f };
+};
+
+namespace ShaderHelper
+{
+    ID3DBlob* CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR target, const D3D_SHADER_MACRO* defines);
+    void CreateShader(ID3D11Device* device, ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC* vertexDesc, UINT vertexDescSize);
+    void CreateShader(ID3D11Device* device, ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
+    void CreateShader(ID3D11Device* device, ID3D11PixelShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
+    void CreateShader(ID3D11Device* device, ID3D11GeometryShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
+    void CreateShader(ID3D11Device* device, ID3D11HullShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
+    void CreateShader(ID3D11Device* device, ID3D11DomainShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
+    void CreateShader(ID3D11Device* device, ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
 };
 
 #endif // D3DUTIL_H
