@@ -615,12 +615,12 @@ void TreeBillboard::BuildFX()
 		{ 0, 0 }
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 3);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 3);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
 
-	CreateShader(&mBillVS, ExePath().append(L"../../../Shaders/Billboard.hlsl").c_str(), "VS", 0, &mTreeLayout, treeVertexDesc, 2);
-	CreateShader(&mBillGS, ExePath().append(L"../../../Shaders/Billboard.hlsl").c_str(), "GS", 0);
-	CreateShader(&mBillPS, ExePath().append(L"../../../Shaders/Billboard.hlsl").c_str(), "PS", basicEffectDefines);
+	ShaderHelper::CreateShader(md3dDevice, &mBillVS, ExePath().append(L"../../../Shaders/Billboard.hlsl").c_str(), "VS", 0, &mTreeLayout, treeVertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mBillGS, ExePath().append(L"../../../Shaders/Billboard.hlsl").c_str(), "GS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mBillPS, ExePath().append(L"../../../Shaders/Billboard.hlsl").c_str(), "PS", basicEffectDefines);
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;

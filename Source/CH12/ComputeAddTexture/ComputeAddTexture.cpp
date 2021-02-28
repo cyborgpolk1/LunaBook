@@ -143,13 +143,13 @@ void ComputeAddTexture::BuildFX()
     auto filename = ExePath().append(L"../../../Shaders/BasicTexture.hlsl");
     auto cstr = filename.c_str();
 
-    CreateShader(&mVS, cstr, "VS", 0, &mInputLayout, vertexDesc, 2);
-    CreateShader(&mPS, cstr, "PS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mVS, cstr, "VS", 0, &mInputLayout, vertexDesc, 2);
+    ShaderHelper::CreateShader(md3dDevice, &mPS, cstr, "PS", 0);
 
     filename = ExePath().append(L"../../../Shaders/ComputeAddTexture.hlsl");
     cstr = filename.c_str();
 
-    CreateShader(&mCS, cstr, "CS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mCS, cstr, "CS", 0);
 
     struct ConstantBuffer {
         XMMATRIX gWorldViewProj;

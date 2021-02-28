@@ -202,9 +202,9 @@ void CircleToCylinder::BuildFX()
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/CircleToCylinder.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mGS, ExePath().append(L"../../../Shaders/CircleToCylinder.hlsl").c_str(), "GS", 0);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/CircleToCylinder.hlsl").c_str(), "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/CircleToCylinder.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mGS, ExePath().append(L"../../../Shaders/CircleToCylinder.hlsl").c_str(), "GS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/CircleToCylinder.hlsl").c_str(), "PS", 0);
 
 	D3D11_BUFFER_DESC constantDesc;
 	constantDesc.Usage = D3D11_USAGE_DYNAMIC;

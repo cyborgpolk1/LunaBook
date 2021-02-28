@@ -33,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DApp.cpp" />
+    <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="GameTimer.cpp" />

@@ -156,8 +156,8 @@ void BlendExamplesApp::BuildFX()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc.data(), vertexDesc.size());
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc.data(), vertexDesc.size());
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "PS", 0);
 
 	mTransforms[0] = XMMatrixTranspose(XMMatrixScaling(0.3f, 0.3f, 1.0f) * XMMatrixTranslation(-0.495f, 0.66f, 0.0f));
 	mTransforms[1] = XMMatrixTranspose(XMMatrixScaling(0.3f, 0.3f, 1.0f) * XMMatrixTranslation(0.495f, 0.66f, 0.0f));

@@ -501,15 +501,15 @@ void TexSkullDemo::BuildFX()
 		{ 0, 0 }
 	};
 
-	CreateShader(&mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mShapeInputLayout, vertexDesc, 3);
-	CreateShader(&mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mShapeInputLayout, vertexDesc, 3);
+	ShaderHelper::CreateShader(md3dDevice, &mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
 
 	for (int i = 0; i < 4; ++i)
 	{
 		std::string lightMacro = std::to_string(i);
 		basicEffectDefines[0] = { "NUM_LIGHTS", lightMacro.c_str() };
-		CreateShader(&mTexPS[i], ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
-		CreateShader(&mLitPS[i], ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", basicEffectDefines);
+		ShaderHelper::CreateShader(md3dDevice, &mTexPS[i], ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
+		ShaderHelper::CreateShader(md3dDevice, &mLitPS[i], ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", basicEffectDefines);
 	}
 
 	D3D11_BUFFER_DESC matrixBufferDesc;

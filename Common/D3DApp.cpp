@@ -530,41 +530,6 @@ void D3DApp::CalculateFrameStats()
 	}
 }
 
-void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC* vertexDesc, UINT vertexDescSize)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines, inputLayout, vertexDesc, vertexDescSize);
-}
-
-void D3DApp::CreateShader(ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines);
-}
-
-void D3DApp::CreateShader(ID3D11PixelShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines);
-}
-
-void D3DApp::CreateShader(ID3D11GeometryShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines);
-}
-
-void D3DApp::CreateShader(ID3D11HullShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines);
-}
-
-void D3DApp::CreateShader(ID3D11DomainShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines);
-}
-
-void D3DApp::CreateShader(ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
-{
-    ShaderHelper::CreateShader(md3dDevice, shader, filename, entry, defines);
-}
-
 std::wstring ExePath() {
 	wchar_t buffer[MAX_PATH];
 	GetModuleFileName(NULL, buffer, MAX_PATH);

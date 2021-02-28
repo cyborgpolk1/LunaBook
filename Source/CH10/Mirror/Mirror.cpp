@@ -610,11 +610,11 @@ void MirrorDemo::BuildFX()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
-	CreateShader(&mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mRoomInputLayout, vertexDesc, 3);
-	CreateShader(&mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mRoomInputLayout, vertexDesc, 3);
+	ShaderHelper::CreateShader(md3dDevice, &mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
 
-	CreateShader(&mTexPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", 0);
-	CreateShader(&mLitPS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mTexPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mLitPS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", 0);
 
 
 	D3D11_BUFFER_DESC perObjectBufferDesc;

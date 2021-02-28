@@ -120,7 +120,7 @@ void ComputeAddVector::BuildFX()
 {
     auto filename = ExePath().append(L"../../../Shaders/ComputeAddVector.hlsl");
     
-    CreateShader(&mCS, filename.c_str(), "CS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mCS, filename.c_str(), "CS", 0);
 }
 
 void ComputeAddVector::DoComputeWork()

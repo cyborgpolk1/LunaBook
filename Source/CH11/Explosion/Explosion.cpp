@@ -200,9 +200,9 @@ void Explosion::BuildFX()
 	auto filename = ExePath().append(L"../../../Shaders/Explosion.hlsl");
 	auto cstr = filename.c_str();
 
-	CreateShader(&mVS, cstr, "VS", 0, &mInputLayout, vertexDesc, 1);
-	CreateShader(&mGS, cstr, "GS", 0);
-	CreateShader(&mPS, cstr, "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, cstr, "VS", 0, &mInputLayout, vertexDesc, 1);
+	ShaderHelper::CreateShader(md3dDevice, &mGS, cstr, "GS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, cstr, "PS", 0);
 
 	D3D11_BUFFER_DESC constantDesc;
 	constantDesc.Usage = D3D11_USAGE_DYNAMIC;

@@ -594,16 +594,16 @@ void OverdrawStencilApp::BuildFX()
 		{ 0, 0 }
 	};
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mSceneLayout, vertexDesc, 3);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mSceneLayout, vertexDesc, 3);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
 
 	D3D11_INPUT_ELEMENT_DESC quadDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	CreateShader(&mQuadVS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "VS", 0, &mQuadLayout, quadDesc, 2);
-	CreateShader(&mQuadPS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mQuadVS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "VS", 0, &mQuadLayout, quadDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mQuadPS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "PS", 0);
 
 
 	// Create matrix buffer

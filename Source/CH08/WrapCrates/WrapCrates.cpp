@@ -221,11 +221,11 @@ void WrapCratesApp::BuildFX()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	//CreateShader(&mVS, L"../../../Shaders/BasicTexture.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
-	//CreateShader(&mPS, L"../../../Shaders/BasicTexture.hlsl", "PS", 0);
+	//ShaderHelper::CreateShader(md3dDevice, &mVS, L"../../../Shaders/BasicTexture.hlsl", "VS", 0, &mInputLayout, vertexDesc, 2);
+	//ShaderHelper::CreateShader(md3dDevice, &mPS, L"../../../Shaders/BasicTexture.hlsl", "PS", 0);
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "PS", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "VS", 0, &mInputLayout, vertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/BasicTexture.hlsl").c_str(), "PS", 0);
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;

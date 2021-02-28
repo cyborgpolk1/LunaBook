@@ -174,9 +174,9 @@ void ComputeVectorLength::BuildFX()
     auto filename = ExePath().append(L"../../../Shaders/ComputeVectorLength.hlsl");
     auto cstr = filename.c_str();
 
-    CreateShader(&mStructCS, cstr, "StructCS", 0);
-    CreateShader(&mTypedCS, cstr, "TypedCS", 0);
-    CreateShader(&mAppendCS, cstr, "AppendCS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mStructCS, cstr, "StructCS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mTypedCS, cstr, "TypedCS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mAppendCS, cstr, "AppendCS", 0);
 }
 
 void ComputeVectorLength::DoComputeWork()

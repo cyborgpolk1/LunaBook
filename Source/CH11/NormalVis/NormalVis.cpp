@@ -222,13 +222,13 @@ void NormalVis::BuildFX()
     auto filename = ExePath().append(L"../../../Shaders/NormalVisualization.hlsl");
     auto cstr = filename.c_str();
 
-    CreateShader(&mNormalVS, cstr, "NormalVS", 0, &mInputLayout, vertexDesc, 2);
-    CreateShader(&mFaceNormalGS, cstr, "FaceNormalGS", 0);
-    CreateShader(&mVertexNormalGS, cstr, "VertexNormalGS", 0);
-    CreateShader(&mNormalPS, cstr, "NormalPS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mNormalVS, cstr, "NormalVS", 0, &mInputLayout, vertexDesc, 2);
+    ShaderHelper::CreateShader(md3dDevice, &mFaceNormalGS, cstr, "FaceNormalGS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mVertexNormalGS, cstr, "VertexNormalGS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mNormalPS, cstr, "NormalPS", 0);
 
-    CreateShader(&mPS, cstr, "PS", 0);
-    CreateShader(&mVS, cstr, "VS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mPS, cstr, "PS", 0);
+    ShaderHelper::CreateShader(md3dDevice, &mVS, cstr, "VS", 0);
 
     D3D11_BUFFER_DESC constantDesc;
     constantDesc.Usage = D3D11_USAGE_DYNAMIC;

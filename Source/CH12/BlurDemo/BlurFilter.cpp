@@ -89,8 +89,8 @@ void BlurFilter::Init(ID3D11Device* device, UINT width, UINT height, DXGI_FORMAT
     {
         auto filename = ExePath().append(L"../../../Shaders/ComputeBlur.hlsl");   
 
-        CreateShader(device, &mHorzCS, filename.c_str(), "HorzBlurCS", 0);
-        CreateShader(device, &mVertCS, filename.c_str(), "VertBlurCS", 0);
+        ShaderHelper::CreateShader(device, &mHorzCS, filename.c_str(), "HorzBlurCS", 0);
+        ShaderHelper::CreateShader(device, &mVertCS, filename.c_str(), "VertBlurCS", 0);
     }
 }
 

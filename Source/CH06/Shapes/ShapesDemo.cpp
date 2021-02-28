@@ -316,8 +316,8 @@ void ShapesDemo::BuildFX()
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/colorVS.hlsl").c_str(), "main", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/colorPS.hlsl").c_str(), "main", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/colorVS.hlsl").c_str(), "main", 0, &mInputLayout, vertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/colorPS.hlsl").c_str(), "main", 0);
 
 
 	D3D11_BUFFER_DESC matrixBufferDesc;

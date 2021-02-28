@@ -226,8 +226,8 @@ void BoxApp::BuildFX()
 	};
 
 
-	CreateShader(&mVS, ExePath().append(L"../../../Shaders/colorVS.hlsl").c_str(), "main", 0, &mInputLayout, vertexDesc, 2);
-	CreateShader(&mPS, ExePath().append(L"../../../Shaders/colorPS.hlsl").c_str(), "main", 0);
+	ShaderHelper::CreateShader(md3dDevice, &mVS, ExePath().append(L"../../../Shaders/colorVS.hlsl").c_str(), "main", 0, &mInputLayout, vertexDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mPS, ExePath().append(L"../../../Shaders/colorPS.hlsl").c_str(), "main", 0);
 
 	// Create matrix buffer
 	D3D11_BUFFER_DESC matrixBufferDesc;
