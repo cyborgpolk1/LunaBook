@@ -87,6 +87,4 @@ protected:
 	bool mEnable4xMsaa;
 };
 
-std::wstring ExePath();
-
 #endif

@@ -97,3 +97,10 @@ void ShaderHelper::CreateShader(ID3D11Device* device, ID3D11ComputeShader** shad
 
     ReleaseCOM(compiledShader);
 }
+
+std::wstring ExePath() {
+    wchar_t buffer[MAX_PATH];
+    GetModuleFileName(NULL, buffer, MAX_PATH);
+    std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+    return std::wstring(buffer).substr(0, pos + 1);
+}
