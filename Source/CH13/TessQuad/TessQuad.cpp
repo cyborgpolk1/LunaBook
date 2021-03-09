@@ -42,6 +42,7 @@ bool TessQuad::Init()
 
     D3D11_RASTERIZER_DESC rsDesc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
     rsDesc.FillMode = D3D11_FILL_WIREFRAME;
+    rsDesc.CullMode = D3D11_CULL_NONE;
 
     HR(md3dDevice->CreateRasterizerState(&rsDesc, &mWireframeRS));
 
