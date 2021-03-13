@@ -12,7 +12,6 @@ struct Vertex
 struct ConstantBuffer
 {
     XMMATRIX World;
-	XMMATRIX WorldView;
 	XMMATRIX WorldViewProj;
     XMFLOAT3 EyePosW;
 };

@@ -104,7 +104,6 @@ void TessIcosahedron::DrawScene()
 
 	ConstantBuffer* dataPtr = (ConstantBuffer*)mappedResource.pData;
     dataPtr->World = XMMatrixIdentity();
-	dataPtr->WorldView = XMMatrixTranspose(view);
 	dataPtr->WorldViewProj = XMMatrixTranspose(view * proj);
     dataPtr->EyePosW = EyePos;
 
@@ -125,7 +124,6 @@ void TessIcosahedron::DrawScene()
 
 	dataPtr = (ConstantBuffer*)mappedResource.pData;
     dataPtr->World = XMMatrixIdentity();
-	dataPtr->WorldView = XMMatrixTranspose(view);
 	dataPtr->WorldViewProj = XMMatrixTranspose(noZoomView * proj);
     dataPtr->EyePosW = EyePos;
 

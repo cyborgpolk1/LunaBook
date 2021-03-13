@@ -1,7 +1,6 @@
 cbuffer cbPerFrame
 {
     float4x4 gWorld;
-    float4x4 gWorldView;
     float4x4 gWorldViewProj;
     float3 gEyePosW;
 };
