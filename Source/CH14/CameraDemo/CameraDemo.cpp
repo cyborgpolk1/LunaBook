@@ -311,9 +311,16 @@ void CameraDemo::OnMouseMove(WPARAM btnState, int x, int y)
         float dx = XMConvertToRadians(0.25f * static_cast<float>(x - mLastMousePos.x));
         float dy = XMConvertToRadians(0.25f * static_cast<float>(y - mLastMousePos.y));
 
-        mCamera.Pitch(dy);
         mCamera.RotateY(dx);
+        mCamera.Pitch(dy);
 	}
+    else if ((btnState & MK_RBUTTON) != 0)
+    {
+        // Make each pixel correspond to a quarter of a degree.
+        float dx = XMConvertToRadians(0.25f * static_cast<float>(x - mLastMousePos.x));
+
+        mCamera.Roll(dx);
+    }
 
 	mLastMousePos.x = x;
 	mLastMousePos.y = y;
