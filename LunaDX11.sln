@@ -186,6 +186,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CameraDemo", "Source\CH14\C
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TessIcosahedron", "Source\CH13\TessIcosahedron\TessIcosahedron.vcxproj", "{3D0034AD-18B9-46D9-9433-3F0ED9E50C86}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuadBezier", "Source\CH13\QuadBezier\QuadBezier.vcxproj", "{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -594,6 +596,14 @@ Global
 		{3D0034AD-18B9-46D9-9433-3F0ED9E50C86}.Release|x64.Build.0 = Release|x64
 		{3D0034AD-18B9-46D9-9433-3F0ED9E50C86}.Release|x86.ActiveCfg = Release|Win32
 		{3D0034AD-18B9-46D9-9433-3F0ED9E50C86}.Release|x86.Build.0 = Release|Win32
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Debug|x64.ActiveCfg = Debug|x64
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Debug|x64.Build.0 = Debug|x64
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Debug|x86.ActiveCfg = Debug|Win32
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Debug|x86.Build.0 = Debug|Win32
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x64.ActiveCfg = Release|x64
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x64.Build.0 = Release|x64
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x86.ActiveCfg = Release|Win32
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -648,6 +658,7 @@ Global
 		{ECB39875-6749-462D-8B7F-A9BCE9B21A5E} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 		{FD3BCE81-562F-43E0-BA0B-716351025F44} = {A5E1E7AF-3169-4303-8889-3422449E16DD}
 		{3D0034AD-18B9-46D9-9433-3F0ED9E50C86} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
+		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
