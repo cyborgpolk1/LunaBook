@@ -81,6 +81,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\NormalVisualization.hlsl = Shaders\NormalVisualization.hlsl
 		Shaders\OverdrawQuad.hlsl = Shaders\OverdrawQuad.hlsl
 		Shaders\SubdivideIcosahedron.hlsl = Shaders\SubdivideIcosahedron.hlsl
+		Shaders\TessExamples.hlsl = Shaders\TessExamples.hlsl
 		Shaders\TessIcosahedron.hlsl = Shaders\TessIcosahedron.hlsl
 		Shaders\TessQuad.hlsl = Shaders\TessQuad.hlsl
 		Shaders\ToonLighting.hlsl = Shaders\ToonLighting.hlsl
@@ -187,6 +188,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TessIcosahedron", "Source\CH13\TessIcosahedron\TessIcosahedron.vcxproj", "{3D0034AD-18B9-46D9-9433-3F0ED9E50C86}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuadBezier", "Source\CH13\QuadBezier\QuadBezier.vcxproj", "{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TessFactorExamples", "Source\CH13\TessFactorExamples\TessFactorExamples.vcxproj", "{898248E2-64F3-490E-949F-6F528CC2897B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -604,6 +607,14 @@ Global
 		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x64.Build.0 = Release|x64
 		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x86.ActiveCfg = Release|Win32
 		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518}.Release|x86.Build.0 = Release|Win32
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Debug|x64.ActiveCfg = Debug|x64
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Debug|x64.Build.0 = Debug|x64
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Debug|x86.ActiveCfg = Debug|Win32
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Debug|x86.Build.0 = Debug|Win32
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Release|x64.ActiveCfg = Release|x64
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Release|x64.Build.0 = Release|x64
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Release|x86.ActiveCfg = Release|Win32
+		{898248E2-64F3-490E-949F-6F528CC2897B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -659,6 +670,7 @@ Global
 		{FD3BCE81-562F-43E0-BA0B-716351025F44} = {A5E1E7AF-3169-4303-8889-3422449E16DD}
 		{3D0034AD-18B9-46D9-9433-3F0ED9E50C86} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
+		{898248E2-64F3-490E-949F-6F528CC2897B} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
