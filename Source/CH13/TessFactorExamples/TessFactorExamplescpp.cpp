@@ -97,21 +97,21 @@ void TessFactorExamples::BuildPatchBuffers()
 {
     std::vector<XMFLOAT3> tris =
     {
-        XMFLOAT3(-0.9f, 0.1f, 0.0f),
+        XMFLOAT3(-0.95f, 0.1f, 0.0f),
         XMFLOAT3(-0.75f, 0.9f, 0.0f),
-        XMFLOAT3(-0.6f, 0.1f, 0.0f),
+        XMFLOAT3(-0.55f, 0.1f, 0.0f),
 
-        XMFLOAT3(-0.4f, 0.1f, 0.0f),
+        XMFLOAT3(-0.45f, 0.1f, 0.0f),
         XMFLOAT3(-0.25f, 0.9f, 0.0f),
-        XMFLOAT3(-0.1f, 0.1f, 0.0f),
+        XMFLOAT3(-0.05f, 0.1f, 0.0f),
 
-        XMFLOAT3(0.1f, 0.1f, 0.0f),
+        XMFLOAT3(0.05f, 0.1f, 0.0f),
         XMFLOAT3(0.25f, 0.9f, 0.0f),
-        XMFLOAT3(0.4f, 0.1f, 0.0f),
+        XMFLOAT3(0.45f, 0.1f, 0.0f),
 
-        XMFLOAT3(0.6f, 0.1f, 0.0f),
+        XMFLOAT3(0.55f, 0.1f, 0.0f),
         XMFLOAT3(0.75f, 0.9f, 0.0f),
-        XMFLOAT3(0.9f, 0.1f, 0.0f)
+        XMFLOAT3(0.95f, 0.1f, 0.0f)
     };
 
     mTriVertexCount = tris.size();
@@ -130,25 +130,25 @@ void TessFactorExamples::BuildPatchBuffers()
 
     std::vector<XMFLOAT3> quads =
     {
-        XMFLOAT3(-0.9f, -0.1f, 0.0f),
-        XMFLOAT3(-0.6f, -0.1f, 0.0f),
-        XMFLOAT3(-0.9f, -0.9f, 0.0f),
-        XMFLOAT3(-0.6f, -0.9f, 0.0f),
+        XMFLOAT3(-0.95f, -0.1f, 0.0f),
+        XMFLOAT3(-0.55f, -0.1f, 0.0f),
+        XMFLOAT3(-0.95f, -0.9f, 0.0f),
+        XMFLOAT3(-0.55f, -0.9f, 0.0f),
 
-        XMFLOAT3(-0.4f, -0.1f, 0.0f),
-        XMFLOAT3(-0.1f, -0.1f, 0.0f),
-        XMFLOAT3(-0.4f, -0.9f, 0.0f),
-        XMFLOAT3(-0.1f, -0.9f, 0.0f),
+        XMFLOAT3(-0.45f, -0.1f, 0.0f),
+        XMFLOAT3(-0.05f, -0.1f, 0.0f),
+        XMFLOAT3(-0.45f, -0.9f, 0.0f),
+        XMFLOAT3(-0.05f, -0.9f, 0.0f),
 
-        XMFLOAT3(0.1f, -0.1f, 0.0f),
-        XMFLOAT3(0.4f, -0.1f, 0.0f),
-        XMFLOAT3(0.1f, -0.9f, 0.0f),
-        XMFLOAT3(0.4f, -0.9f, 0.0f),
+        XMFLOAT3(0.05f, -0.1f, 0.0f),
+        XMFLOAT3(0.45f, -0.1f, 0.0f),
+        XMFLOAT3(0.05f, -0.9f, 0.0f),
+        XMFLOAT3(0.45f, -0.9f, 0.0f),
 
-        XMFLOAT3(0.6f, -0.1f, 0.0f),
-        XMFLOAT3(0.9f, -0.1f, 0.0f),
-        XMFLOAT3(0.6f, -0.9f, 0.0f),
-        XMFLOAT3(0.9f, -0.9f, 0.0f),
+        XMFLOAT3(0.55f, -0.1f, 0.0f),
+        XMFLOAT3(0.95f, -0.1f, 0.0f),
+        XMFLOAT3(0.55f, -0.9f, 0.0f),
+        XMFLOAT3(0.95f, -0.9f, 0.0f),
     };
 
     mQuadVertexCount = quads.size();
