@@ -4,11 +4,11 @@
 D3DMAIN(QuadBezier);
 
 QuadBezier::QuadBezier(HINSTANCE hInstance)
-    :D3DApp(hInstance), mQuadPatchVB(0), mInputLayout(0), mWireframeRS(0),
-    mVS(0), mHS(0), mDS(0), mPS(0), mMatrixBuffer(0),
+    :D3DApp(hInstance), mQuadPatchVB(0), mInputLayout(0), mWireframeRS(0), mNoCullRS(0),
+    mVS(0), mHS(0), mDS(0), mPS(0), mMatrixBuffer(0), mUseWireframe(true),
     mTheta(1.3f*MathHelper::Pi), mPhi(0.4f*MathHelper::Pi), mRadius(80.0f)
 {
-    mMainWndCaption = L"Bezier Surface Demo";
+    mMainWndCaption = L"Quadratic Bezier Surface Demo";
 
     mLastMousePos.x = 0;
     mLastMousePos.y = 0;
@@ -24,6 +24,7 @@ QuadBezier::~QuadBezier()
     ReleaseCOM(mQuadPatchVB);
     ReleaseCOM(mInputLayout);
     ReleaseCOM(mWireframeRS);
+    ReleaseCOM(mNoCullRS);
     ReleaseCOM(mVS);
     ReleaseCOM(mHS);
     ReleaseCOM(mDS);
@@ -44,6 +45,9 @@ bool QuadBezier::Init()
     rsDesc.CullMode = D3D11_CULL_NONE;
     HR(md3dDevice->CreateRasterizerState(&rsDesc, &mWireframeRS));
 
+    rsDesc.FillMode = D3D11_FILL_SOLID;
+    HR(md3dDevice->CreateRasterizerState(&rsDesc, &mNoCullRS));
+
     return true;
 }
 
@@ -57,6 +61,9 @@ void QuadBezier::OnResize()
 
 void QuadBezier::UpdateScene(float dt)
 {
+    if (GetAsyncKeyState('W') & 0x01)
+        mUseWireframe = !mUseWireframe;
+
     // Convert Spherical to Cartesian coordinates.
     float x = mRadius * sinf(mPhi) * cosf(mTheta);
     float z = mRadius * sinf(mPhi) * sinf(mTheta);
@@ -92,6 +99,7 @@ void QuadBezier::DrawScene()
     HR(md3dImmediateContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
     MatrixBuffer* dataPtr = reinterpret_cast<MatrixBuffer*>(mappedResource.pData);
+    dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
     dataPtr->WorldViewProj = XMMatrixTranspose(world * view * proj);
 
     md3dImmediateContext->Unmap(mMatrixBuffer, 0);
@@ -103,7 +111,15 @@ void QuadBezier::DrawScene()
     md3dImmediateContext->DSSetShader(mDS, 0, 0);
     md3dImmediateContext->PSSetShader(mPS, 0, 0);
 
-    md3dImmediateContext->RSSetState(mWireframeRS);
+    if (mUseWireframe)
+    {
+        md3dImmediateContext->RSSetState(mWireframeRS);
+    }
+    else
+    {
+        md3dImmediateContext->RSSetState(mNoCullRS);
+    }
+    
 
     md3dImmediateContext->Draw(16, 0);
 

@@ -4,6 +4,7 @@
 
 struct MatrixBuffer
 {
+    XMMATRIX WorldInvTranspose;
     XMMATRIX WorldViewProj;
 };
 
@@ -39,6 +40,7 @@ private:
     ID3D11Buffer* mMatrixBuffer;
 
     ID3D11RasterizerState* mWireframeRS;
+    ID3D11RasterizerState* mNoCullRS;
 
     XMFLOAT4X4 mWorld;
     XMFLOAT4X4 mView;
@@ -49,4 +51,6 @@ private:
     float mRadius;
 
     POINT mLastMousePos;
+
+    bool mUseWireframe;
 };

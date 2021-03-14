@@ -1,5 +1,6 @@
 cbuffer cbPerObject
 {
+    float4x4 gWorldInvTranspose;
     float4x4 gWorldViewProj;
 };
 
@@ -101,6 +102,7 @@ HullOut QuadHS(InputPatch<VertexOut, 9> p, uint i : SV_OutputControlPointID, uin
 struct DomainOut
 {
     float4 PosH : SV_Position;
+    float3 NormalH : NORMAL;
 };
 
 float4 BernsteinBasis(float t)
@@ -201,6 +203,14 @@ DomainOut DS(PatchTess patchTess, float2 uv : SV_DomainLocation, const OutputPat
     
     dout.PosH = mul(float4(p, 1.0f), gWorldViewProj);
     
+    float4 dBasisU = dBernsteinBasis(uv.x);
+    float4 dBasisV = dBernsteinBasis(uv.y);
+    
+    float3 dpdu = CubicBezierSum(bezPatch, dBasisU, basisV);
+    float3 dpdv = CubicBezierSum(bezPatch, basisU, dBasisV);
+    
+    dout.NormalH = mul(cross(dpdu, dpdv), (float3x3) gWorldInvTranspose);
+    
     return dout;
 }
 
@@ -216,10 +226,19 @@ DomainOut QuadDS(PatchTess patchTess, float2 uv : SV_DomainLocation, const Outpu
     
     dout.PosH = mul(float4(p, 1.0f), gWorldViewProj);
     
+    float3 dBasisU = dQuadBernsteinBasis(uv.x);
+    float3 dBasisV = dQuadBernsteinBasis(uv.y);
+    
+    float3 dpdu = QuadBezierSum(bezPatch, dBasisU, basisV);
+    float3 dpdv = QuadBezierSum(bezPatch, basisU, dBasisV);
+    
+    dout.NormalH = mul(cross(dpdu, dpdv), (float3x3) gWorldInvTranspose);
+    
     return dout;
 }
 
 float4 PS(DomainOut pin) : SV_Target
 {
-    return float4(1.0f, 1.0f, 1.0f, 1.0f);
+    float ndotl = dot(normalize(pin.NormalH), -float3(-1.0f, -1.0f, 0.0));
+    return float4(ndotl, ndotl, ndotl, 1.0f);
 }
