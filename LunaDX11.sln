@@ -194,6 +194,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TessFactorExamples", "Sourc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InstancingAndCullingDemo", "Source\CH15\InstancingAndCullingDemo\InstancingAndCullingDemo.vcxproj", "{0260B2E4-81E3-47BD-836A-966A22A33938}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Picking", "Source\CH16\Picking\Picking.vcxproj", "{65DC8735-81FC-4272-8003-4071024A0E2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -626,6 +628,14 @@ Global
 		{0260B2E4-81E3-47BD-836A-966A22A33938}.Release|x64.Build.0 = Release|x64
 		{0260B2E4-81E3-47BD-836A-966A22A33938}.Release|x86.ActiveCfg = Release|Win32
 		{0260B2E4-81E3-47BD-836A-966A22A33938}.Release|x86.Build.0 = Release|Win32
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Debug|x64.ActiveCfg = Debug|x64
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Debug|x64.Build.0 = Debug|x64
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Debug|x86.ActiveCfg = Debug|Win32
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Debug|x86.Build.0 = Debug|Win32
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x64.ActiveCfg = Release|x64
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x64.Build.0 = Release|x64
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x86.ActiveCfg = Release|Win32
+		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -683,6 +693,7 @@ Global
 		{013BFA3C-D605-4BD2-9216-6A3F4EA8A518} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 		{898248E2-64F3-490E-949F-6F528CC2897B} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 		{0260B2E4-81E3-47BD-836A-966A22A33938} = {F63A252F-9108-40D2-BB25-7FACE3D8EAD7}
+		{65DC8735-81FC-4272-8003-4071024A0E2C} = {DFB4FC6D-21C8-45C4-88EF-87B8B1B8AF21}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
