@@ -33,7 +33,7 @@ ID3DBlob* ShaderHelper::CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR tar
     return compiledShader;
 }
 
-void ShaderHelper::CreateShader(ID3D11Device* device, ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC* vertexDesc, UINT vertexDescSize)
+void ShaderHelper::CreateShader(ID3D11Device* device, ID3D11VertexShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines, ID3D11InputLayout** inputLayout, const D3D11_INPUT_ELEMENT_DESC* vertexDesc, UINT vertexDescSize)
 {
     ID3DBlob* compiledShader = CompileShader(filename, entry, "vs_5_0", defines);
 
