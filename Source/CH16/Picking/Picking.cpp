@@ -9,7 +9,7 @@ PickingDemo::PickingDemo(HINSTANCE hInstance)
     : D3DApp(hInstance), mCarVB(0), mCarIB(0), mVS(0), mPS(0),
     mInputLayout(0), mPerFrameBuffer(0), mPerObjectBuffer(0),
     mCarIndexCount(0), mPickedTriangle(-1), mLessEqualDS(0), 
-    mWireframeRS(0), mWireframe(false)
+    mWireframeRS(0), mWireframe(false), heldDown(false)
 {
     mMainWndCaption = L"Picking Demo";
 
@@ -101,11 +101,14 @@ void PickingDemo::UpdateScene(float dt)
 
     if (GetAsyncKeyState('1') & 0x8000)
     {
-        mWireframe = true;
+        if (!heldDown) {
+            mWireframe = !mWireframe;
+            heldDown = true;
+        }
     }
     else
     {
-        mWireframe = false;
+        heldDown = false;
     }
 
 

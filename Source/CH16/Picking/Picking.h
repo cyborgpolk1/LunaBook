@@ -80,5 +80,7 @@ private:
 
     Camera mCamera;
 
+    bool heldDown;
+
     POINT mLastMousePos;
 };
