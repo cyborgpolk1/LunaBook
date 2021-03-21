@@ -81,6 +81,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\Multitexture.hlsl = Shaders\Multitexture.hlsl
 		Shaders\NormalVisualization.hlsl = Shaders\NormalVisualization.hlsl
 		Shaders\OverdrawQuad.hlsl = Shaders\OverdrawQuad.hlsl
+		Shaders\SkyBox.hlsl = Shaders\SkyBox.hlsl
 		Shaders\SubdivideIcosahedron.hlsl = Shaders\SubdivideIcosahedron.hlsl
 		Shaders\TessExamples.hlsl = Shaders\TessExamples.hlsl
 		Shaders\TessIcosahedron.hlsl = Shaders\TessIcosahedron.hlsl
@@ -195,6 +196,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InstancingAndCullingDemo", "Source\CH15\InstancingAndCullingDemo\InstancingAndCullingDemo.vcxproj", "{0260B2E4-81E3-47BD-836A-966A22A33938}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Picking", "Source\CH16\Picking\Picking.vcxproj", "{65DC8735-81FC-4272-8003-4071024A0E2C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CubeMapDemo", "Source\CH17\CubeMapDemo\CubeMapDemo.vcxproj", "{ED78B440-5AB3-4261-843C-AAC4A7FD261F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -636,6 +639,14 @@ Global
 		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x64.Build.0 = Release|x64
 		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x86.ActiveCfg = Release|Win32
 		{65DC8735-81FC-4272-8003-4071024A0E2C}.Release|x86.Build.0 = Release|Win32
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Debug|x64.ActiveCfg = Debug|x64
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Debug|x64.Build.0 = Debug|x64
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Debug|x86.ActiveCfg = Debug|Win32
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Debug|x86.Build.0 = Debug|Win32
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x64.ActiveCfg = Release|x64
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x64.Build.0 = Release|x64
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x86.ActiveCfg = Release|Win32
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -694,6 +705,7 @@ Global
 		{898248E2-64F3-490E-949F-6F528CC2897B} = {ADDC21B6-B9B3-4841-9903-E7AA884AEDDB}
 		{0260B2E4-81E3-47BD-836A-966A22A33938} = {F63A252F-9108-40D2-BB25-7FACE3D8EAD7}
 		{65DC8735-81FC-4272-8003-4071024A0E2C} = {DFB4FC6D-21C8-45C4-88EF-87B8B1B8AF21}
+		{ED78B440-5AB3-4261-843C-AAC4A7FD261F} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}

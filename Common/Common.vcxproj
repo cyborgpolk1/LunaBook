@@ -29,6 +29,7 @@
     <ClInclude Include="GeometryGenerator.h" />
     <ClInclude Include="LightHelper.h" />
     <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="Sky.h" />
     <ClInclude Include="Waves.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
@@ -41,6 +42,7 @@
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="MathHelpher.cpp" />
+    <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Waves.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
