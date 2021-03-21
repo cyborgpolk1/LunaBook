@@ -21,6 +21,7 @@ struct PerObjectBuffer
 	XMMATRIX WorldViewProj;
 	XMMATRIX TextureTransform;
 	Material Mat;
+    int Options;
 };
 
 #pragma pack 4

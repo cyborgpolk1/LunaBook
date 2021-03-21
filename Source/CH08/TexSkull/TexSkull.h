@@ -36,6 +36,7 @@ struct PerObjectBuffer
 	XMMATRIX WorldViewProj;
 	XMMATRIX gTexTransform;
 	Material Mat;
+    int Options;
 };
 
 class TexSkullDemo : public D3DApp
@@ -62,13 +63,13 @@ private:
 private:
 	ID3D11Buffer *mShapesVB, *mSkullVB;
 	ID3D11Buffer *mShapesIB, *mSkullIB;
-	ID3D11VertexShader *mTexVS, *mLitVS;
-	ID3D11PixelShader *mTexPS[4], *mLitPS[4];
+	ID3D11VertexShader *mTexVS;
+	ID3D11PixelShader *mTexPS[4];
 
 	ID3D11Buffer* mPerFrameBuffer;
 	ID3D11Buffer* mPerObjectBuffer;
 
-	ID3D11InputLayout *mShapeInputLayout, *mSkullInputLayout;
+	ID3D11InputLayout *mShapeInputLayout;
 
 	int mBoxVertexOffset;
 	int mGridVertexOffset;

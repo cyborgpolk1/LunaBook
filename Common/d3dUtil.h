@@ -68,6 +68,13 @@ namespace ShaderHelper
     void CreateShader(ID3D11Device* device, ID3D11ComputeShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines);
 };
 
+enum BasicEffectOptions
+{
+    STANDARD_LIGHTING = 0,
+    USE_TEXTURES = 1,
+    USE_ALPHA_CLIPPING = 2
+};
+
 std::wstring ExePath();
 
 #endif // D3DUTIL_H

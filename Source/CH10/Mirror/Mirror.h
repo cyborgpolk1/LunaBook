@@ -48,6 +48,7 @@ struct PerObjectBuffer
 	XMMATRIX WorldViewProj;
 	XMMATRIX gTexTransform;
 	Material Mat;
+    int Options;
 };
 
 class MirrorDemo : public D3DApp
@@ -92,8 +93,8 @@ private:
 
 	Constants currentConstants;
 
-	ID3D11VertexShader *mTexVS, *mLitVS;
-	ID3D11PixelShader *mTexPS, *mLitPS;
+	ID3D11VertexShader *mTexVS;
+	ID3D11PixelShader *mTexPS;
 
 	ID3D11Buffer* mPerFrameBuffer;
 	ID3D11Buffer* mReflectedPerFrameBuffer;
@@ -101,7 +102,6 @@ private:
 	ID3D11Buffer* mPerObjectBuffer;
 
 	ID3D11InputLayout* mRoomInputLayout;
-	ID3D11InputLayout* mSkullInputLayout;
 
 	XMFLOAT3 mSkullTranslation;
 

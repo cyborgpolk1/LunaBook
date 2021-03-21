@@ -10,11 +10,11 @@ D3DMAIN(MirrorDemo);
 
 MirrorDemo::MirrorDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mRoomVB(0), mSkullVB(0), mSkullIB(0), mSkullIndexCount(0),
-	mTexVS(0), mLitVS(0), mTexPS(0), mLitPS(0), mCullClockwiseRS(0), mNoCullRS(0), currentConstants(NONE),
+	mTexVS(0), mTexPS(0), mCullClockwiseRS(0), mNoCullRS(0), currentConstants(NONE),
 	mMarkMirrorDSS(0), mDrawReflectionDSS(0), mNoDoubleBlendDSS(0), mMarkFloorDSS(0),
 	mNoRenderTargetWriteBS(0), mTransparentBS(0),
 	mPerFrameBuffer(0), mReflectedPerFrameBuffer(0), mPerObjectBuffer(0), mCurrentPerFrameBuffer(0),
-	mRoomInputLayout(0), mSkullInputLayout(0), mEyePosW(0.0f, 0.0f, 0.0f), mSampleState(0),
+	mRoomInputLayout(0),mEyePosW(0.0f, 0.0f, 0.0f), mSampleState(0),
 	mFloorTexture(0), mWallTexture(0), mMirrorTexture(0), mSkullTranslation(0.0f, 1.0f, -5.0f),
 	mTheta(1.24f * MathHelper::Pi), mPhi(0.42f * MathHelper::Pi), mRadius(12.0f)
 {
@@ -68,11 +68,8 @@ MirrorDemo::~MirrorDemo()
 	ReleaseCOM(mSkullVB);
 	ReleaseCOM(mSkullIB);
 	ReleaseCOM(mRoomInputLayout);
-	ReleaseCOM(mSkullInputLayout);
 	ReleaseCOM(mTexVS);
-	ReleaseCOM(mLitVS);
 	ReleaseCOM(mTexPS);
-	ReleaseCOM(mLitPS);
 	ReleaseCOM(mPerObjectBuffer);
 	ReleaseCOM(mPerFrameBuffer);
 	ReleaseCOM(mReflectedPerFrameBuffer);
@@ -293,14 +290,14 @@ void MirrorDemo::SetRoomConstants()
 
 void MirrorDemo::SetSkullConstants()
 {
-	md3dImmediateContext->IASetInputLayout(mSkullInputLayout);
+	md3dImmediateContext->IASetInputLayout(mRoomInputLayout);
 	UINT stride = sizeof(BasicVertex);
 	UINT offset = 0;
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
 
-	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mLitPS, 0, 0);
+	md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
+	md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
 
 	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mCurrentPerFrameBuffer);
 
@@ -327,6 +324,7 @@ void MirrorDemo::DrawWall(bool drawBackWall)
 	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	objectDataPtr->gTexTransform = XMMatrixIdentity();
 	objectDataPtr->Mat = mRoomMat;
+    objectDataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
@@ -348,6 +346,7 @@ void MirrorDemo::DrawWall(bool drawBackWall)
 		objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 		objectDataPtr->gTexTransform = XMMatrixScaling(2.0f, 2.0f, 1.0f);
 		objectDataPtr->Mat = mRoomMat;
+        objectDataPtr->Options = USE_TEXTURES;
 
 		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
@@ -375,6 +374,7 @@ void MirrorDemo::DrawMirror()
 	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	objectDataPtr->gTexTransform = XMMatrixIdentity();
 	objectDataPtr->Mat = mMirrorMat;
+    objectDataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
@@ -406,6 +406,7 @@ void MirrorDemo::DrawSkull(Material skullMat)
 	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	objectDataPtr->gTexTransform = XMMatrixIdentity();
 	objectDataPtr->Mat = skullMat;
+    objectDataPtr->Options = STANDARD_LIGHTING;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
@@ -435,6 +436,7 @@ void MirrorDemo::DrawFloor()
 	objectDataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	objectDataPtr->gTexTransform = XMMatrixIdentity();
 	objectDataPtr->Mat = mRoomMat;
+    objectDataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 
@@ -611,10 +613,8 @@ void MirrorDemo::BuildFX()
 	};
 
 	ShaderHelper::CreateShader(md3dDevice, &mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mRoomInputLayout, vertexDesc, 3);
-	ShaderHelper::CreateShader(md3dDevice, &mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
 
 	ShaderHelper::CreateShader(md3dDevice, &mTexPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", 0);
-	ShaderHelper::CreateShader(md3dDevice, &mLitPS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", 0);
 
 
 	D3D11_BUFFER_DESC perObjectBufferDesc;

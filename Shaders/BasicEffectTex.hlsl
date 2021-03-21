@@ -22,6 +22,11 @@ cbuffer cbPerObject : register(b1)
     float4x4 gWorldViewProj;
     float4x4 gTexTransform;
     Material gMaterial;
+        
+    // Multiple options
+    // Use Texture = 0x01
+    // Use Alpha Clipping = 0x02
+    int gOptions = 0x01;
 };
 
 Texture2D gTex : register(t0);
@@ -60,10 +65,15 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	float4 texColor = gTex.Sample(gSample, pin.TexC);
-#ifdef CLIP
-	clip(texColor.a - 0.1f);
-#endif
+    float4 texColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    
+    if (gOptions & 0x1)
+    {
+        texColor = gTex.Sample(gSample, pin.TexC);
+        
+        if (gOptions & 0x02)
+            clip(texColor.a - 0.1f);
+    }
 
     // Interpolating normal can unnormalize it, so normalize it.
     pin.NormalW = normalize(pin.NormalW);

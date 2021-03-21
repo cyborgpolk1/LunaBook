@@ -265,6 +265,7 @@ void OverdrawStencilApp::drawToStencil()
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
 	dataPtr->TextureTransform = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	dataPtr->Mat = mLandMat;
+    dataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -294,6 +295,7 @@ void OverdrawStencilApp::drawToStencil()
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
 	dataPtr->TextureTransform = XMMatrixIdentity();
 	dataPtr->Mat = mCrateMat;
+    dataPtr->Options = USE_TEXTURES | USE_ALPHA_CLIPPING;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -328,6 +330,7 @@ void OverdrawStencilApp::drawToStencil()
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
 	dataPtr->TextureTransform = XMMatrixTranspose(XMLoadFloat4x4(&mWaterTexTransform));
 	dataPtr->Mat = mWavesMat;
+    dataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -590,7 +593,6 @@ void OverdrawStencilApp::BuildFX()
 	};
 
 	D3D_SHADER_MACRO basicEffectDefines[] = {
-		{ "CLIP", "1" },
 		{ 0, 0 }
 	};
 
@@ -602,7 +604,7 @@ void OverdrawStencilApp::BuildFX()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	ShaderHelper::CreateShader(md3dDevice, &mQuadVS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "VS", 0, &mQuadLayout, quadDesc, 2);
+	ShaderHelper::CreateShader(md3dDevice, &mQuadVS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "VS", 0, &mQuadLayout, quadDesc, 1);
 	ShaderHelper::CreateShader(md3dDevice, &mQuadPS, ExePath().append(L"../../../Shaders/OverdrawQuad.hlsl").c_str(), "PS", 0);
 
 

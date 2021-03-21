@@ -267,6 +267,7 @@ void BoltDemo::DrawScene()
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
 	dataPtr->TextureTransform = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	dataPtr->Mat = mLandMat;
+    dataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -296,6 +297,7 @@ void BoltDemo::DrawScene()
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
 	dataPtr->TextureTransform = XMMatrixScaling(1.0f, 2.0f, 0.0f);
 	dataPtr->Mat = mBoltMat;
+    dataPtr->Options = USE_TEXTURES | USE_ALPHA_CLIPPING;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -332,6 +334,7 @@ void BoltDemo::DrawScene()
 	dataPtr->WorldViewProj = XMMatrixTranspose(worldViewProj);
 	dataPtr->TextureTransform = XMMatrixTranspose(XMLoadFloat4x4(&mWaterTexTransform));
 	dataPtr->Mat = mWavesMat;
+    dataPtr->Options = USE_TEXTURES;
 
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -563,7 +566,6 @@ void BoltDemo::BuildFX()
 	};
 
 	D3D_SHADER_MACRO basicEffectDefines[] = {
-		{ "CLIP", "1" },
 		//{"FOG", "1"},
 		{ 0, 0 }
 	};

@@ -11,9 +11,9 @@ D3DMAIN(CubeMapDemo);
 
 CubeMapDemo::CubeMapDemo(HINSTANCE hInstance)
 	: D3DApp(hInstance), mShapesVB(0), mShapesIB(0), mShapeInputLayout(0), mTexVS(0), mPerObjectBuffer(0), mPerFrameBuffer(0),
-	mBoxVertexOffset(0), mGridVertexOffset(0), mSphereVertexOffset(0), mCylinderVertexOffset(0), mLitVS(0),
+	mBoxVertexOffset(0), mGridVertexOffset(0), mSphereVertexOffset(0), mCylinderVertexOffset(0),
 	mBoxIndexCount(0), mGridIndexCount(0), mSphereIndexCount(0), mCylinderIndexCount(0), mSkullIndexCount(0),
-	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0), mSkullInputLayout(0),
+	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0),
     mLightCount(0), mSkullVB(0), mSkullIB(0), mSky(0)
 {
 	mMainWndCaption = L"Camera Demo";
@@ -24,7 +24,6 @@ CubeMapDemo::CubeMapDemo(HINSTANCE hInstance)
 	for (int i = 0; i < 4; ++i)
 	{
 		mTexPS[i] = 0;
-		mLitPS[i] = 0;
 	}
 		
     mCamera.SetPosition(0.0f, 2.0f, -15.0f);
@@ -93,13 +92,10 @@ CubeMapDemo::~CubeMapDemo()
 	ReleaseCOM(mSkullVB);
 	ReleaseCOM(mSkullIB);
 	ReleaseCOM(mShapeInputLayout);
-	ReleaseCOM(mSkullInputLayout);
 	ReleaseCOM(mTexVS);
-	ReleaseCOM(mLitVS);
 	for (int i = 0; i < 4; ++i)
 	{
 		ReleaseCOM(mTexPS[i]);
-		ReleaseCOM(mLitPS[i]);
 	}
 	ReleaseCOM(mPerFrameBuffer);
 	ReleaseCOM(mPerObjectBuffer);
@@ -203,6 +199,7 @@ void CubeMapDemo::DrawScene()
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->gTexTransform = XMMatrixScaling(5.0f, 5.0f, 0.0f);
 	dataPtr->Mat = mGridMat;
+    dataPtr->Options = USE_TEXTURES;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -219,6 +216,7 @@ void CubeMapDemo::DrawScene()
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->gTexTransform = XMMatrixIdentity();
 	dataPtr->Mat = mBoxMat;
+    dataPtr->Options = USE_TEXTURES;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -237,6 +235,7 @@ void CubeMapDemo::DrawScene()
 		dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 		dataPtr->gTexTransform = XMMatrixIdentity();
 		dataPtr->Mat = mCylinderMat;
+        dataPtr->Options = USE_TEXTURES;
 		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 		md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 		md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -256,6 +255,7 @@ void CubeMapDemo::DrawScene()
 		dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 		dataPtr->gTexTransform = XMMatrixIdentity();
 		dataPtr->Mat = mSphereMat;
+        dataPtr->Options = USE_TEXTURES;
 		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 		md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 		md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -271,9 +271,6 @@ void CubeMapDemo::DrawScene()
 	md3dImmediateContext->IASetVertexBuffers(0, 1, &mSkullVB, &stride, &offset);
 	md3dImmediateContext->IASetIndexBuffer(mSkullIB, DXGI_FORMAT_R32_UINT, 0);
 
-	md3dImmediateContext->VSSetShader(mLitVS, 0, 0);
-	md3dImmediateContext->PSSetShader(mLitPS[mLightCount], 0, 0);
-
 	md3dImmediateContext->PSSetConstantBuffers(0, 1, &mPerFrameBuffer);
 
 	// Draw skull
@@ -285,6 +282,7 @@ void CubeMapDemo::DrawScene()
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->gTexTransform = XMMatrixIdentity();
 	dataPtr->Mat = mSkullMat;
+    dataPtr->Options = STANDARD_LIGHTING;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -504,14 +502,12 @@ void CubeMapDemo::BuildFX()
 	};
 
 	ShaderHelper::CreateShader(md3dDevice, &mTexVS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "VS", 0, &mShapeInputLayout, vertexDesc, 3);
-	ShaderHelper::CreateShader(md3dDevice, &mLitVS, ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "VS", 0, &mSkullInputLayout, vertexDesc, 2);
 
 	for (int i = 0; i < 4; ++i)
 	{
 		std::string lightMacro = std::to_string(i);
 		basicEffectDefines[0] = { "NUM_LIGHTS", lightMacro.c_str() };
 		ShaderHelper::CreateShader(md3dDevice, &mTexPS[i], ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
-		ShaderHelper::CreateShader(md3dDevice, &mLitPS[i], ExePath().append(L"../../../Shaders/BasicEffect.hlsl").c_str(), "PS", basicEffectDefines);
 	}
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
@@ -544,12 +540,12 @@ void CubeMapDemo::BuildTex()
 	HR(CreateDDSTextureFromFile(md3dDevice, ExePath().append(L"../../../Textures/stone.dds").c_str(), &stoneResource, &mStoneTex));
 
 	D3D11_SAMPLER_DESC samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.MaxAnisotropy = 4;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	samplerDesc.BorderColor[0] = 0;
 	samplerDesc.BorderColor[1] = 0;
