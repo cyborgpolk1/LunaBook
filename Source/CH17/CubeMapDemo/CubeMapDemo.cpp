@@ -16,7 +16,7 @@ CubeMapDemo::CubeMapDemo(HINSTANCE hInstance)
 	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0),
     mLightCount(0), mSkullVB(0), mSkullIB(0), mSky(0)
 {
-	mMainWndCaption = L"Camera Demo";
+	mMainWndCaption = L"Cube Map Demo";
 
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
@@ -67,22 +67,27 @@ CubeMapDemo::CubeMapDemo(HINSTANCE hInstance)
 	mGridMat.Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	mGridMat.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	mGridMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
+    mGridMat.Reflect = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	mCylinderMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mCylinderMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mCylinderMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
+    mCylinderMat.Reflect = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	mSphereMat.Ambient = XMFLOAT4(0.1f, 0.2f, 0.3f, 1.0f);
 	mSphereMat.Diffuse = XMFLOAT4(0.2f, 0.4f, 0.6f, 1.0f);
 	mSphereMat.Specular = XMFLOAT4(0.9f, 0.9f, 0.9f, 16.0f);
+    mSphereMat.Reflect = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 
 	mBoxMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mBoxMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	mBoxMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
+    mBoxMat.Reflect = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	mSkullMat.Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	mSkullMat.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	mSkullMat.Specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 16.0f);
+    mSkullMat.Reflect = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 }
 
 CubeMapDemo::~CubeMapDemo()
@@ -244,6 +249,10 @@ void CubeMapDemo::DrawScene()
 		md3dImmediateContext->DrawIndexed(mCylinderIndexCount, mCylinderIndexOffset, mCylinderVertexOffset);
 	}
 
+    // Following objects are reflective
+    ID3D11ShaderResourceView* envMap = mSky->CubeMapSRV();
+    md3dImmediateContext->PSSetShaderResources(1, 1, &envMap);
+
 	// Draw the spheres
 	for (int i = 0; i < 10; ++i)
 	{
@@ -255,7 +264,7 @@ void CubeMapDemo::DrawScene()
 		dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 		dataPtr->gTexTransform = XMMatrixIdentity();
 		dataPtr->Mat = mSphereMat;
-        dataPtr->Options = USE_TEXTURES;
+        dataPtr->Options = USE_TEXTURES | USE_ENV_MAPPING;
 		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 		md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 		md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -282,7 +291,7 @@ void CubeMapDemo::DrawScene()
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->gTexTransform = XMMatrixIdentity();
 	dataPtr->Mat = mSkullMat;
-    dataPtr->Options = STANDARD_LIGHTING;
+    dataPtr->Options = STANDARD_LIGHTING | USE_ENV_MAPPING;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->PSSetConstantBuffers(1, 1, &mPerObjectBuffer);

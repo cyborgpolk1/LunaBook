@@ -26,10 +26,13 @@ cbuffer cbPerObject : register(b1)
     // Multiple options
     // Use Texture = 0x01
     // Use Alpha Clipping = 0x02
+    // Enable Reflections (env mapping) = 0x03
     int gOptions = 0x01;
 };
 
 Texture2D gTex : register(t0);
+TextureCube gCubeMap : register(t1);
+
 SamplerState gSample : register(s0);
 
 struct VertexIn
@@ -92,24 +95,40 @@ float4 PS(VertexOut pin) : SV_Target
     //
 
 
-    // Start with a sum of zero.
-    float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-    // Sum the light contribution from each light source.
-    [unroll]
-    for (int i = 0; i < NUM_LIGHTS; ++i)
+    float4 litColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    if (NUM_LIGHTS > 0)
     {
-        float4 A, D, S;
-        ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye, A, D, S);
+        // Start with a sum of zero.
+        float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-        ambient += A;
-        diffuse += D;
-        spec += S;
+        // Sum the light contribution from each light source.
+        [unroll]
+        for (int i = 0; i < NUM_LIGHTS; ++i)
+        {
+            float4 A, D, S;
+            ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye, A, D, S);
+
+            ambient += A;
+            diffuse += D;
+            spec += S;
+        }
+
+        litColor = texColor * (ambient + diffuse) + spec;
+    
+        // Environment Mapping
+        if (gOptions & 0x04)
+        {
+            float3 incident = -toEye;
+            float3 reflectionVector = reflect(incident, pin.NormalW);
+            float4 reflectionColor = gCubeMap.Sample(gSample, reflectionVector);
+        
+            litColor += gMaterial.Reflect * reflectionColor;
+        }
     }
 
-	float4 litColor = texColor * (ambient + diffuse) + spec;
 
 #ifdef FOG
 	float fogLerp = saturate((distToEye - gFogStart) / gFogRange);
@@ -121,7 +140,7 @@ float4 PS(VertexOut pin) : SV_Target
     litColor = float4(0.1f, 0.1f, 0.1f, 1.0f);
 #else
     // Common to take alpha from diffuse material.
-    litColor.a = gMaterial.Diffuse.a * texColor.a;
+        litColor.a = gMaterial.Diffuse.a * texColor.a;
 #endif
 
     return litColor;

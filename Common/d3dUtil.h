@@ -72,7 +72,8 @@ enum BasicEffectOptions
 {
     STANDARD_LIGHTING = 0,
     USE_TEXTURES = 1,
-    USE_ALPHA_CLIPPING = 2
+    USE_ALPHA_CLIPPING = 2,
+    USE_ENV_MAPPING = 4
 };
 
 std::wstring ExePath();

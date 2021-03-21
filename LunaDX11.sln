@@ -199,6 +199,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Picking", "Source\CH16\Pick
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CubeMapDemo", "Source\CH17\CubeMapDemo\CubeMapDemo.vcxproj", "{ED78B440-5AB3-4261-843C-AAC4A7FD261F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicCubeMap", "Source\CH17\DynamicCubeMap\DynamicCubeMap.vcxproj", "{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -647,6 +649,14 @@ Global
 		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x64.Build.0 = Release|x64
 		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x86.ActiveCfg = Release|Win32
 		{ED78B440-5AB3-4261-843C-AAC4A7FD261F}.Release|x86.Build.0 = Release|Win32
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Debug|x64.ActiveCfg = Debug|x64
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Debug|x64.Build.0 = Debug|x64
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Debug|x86.ActiveCfg = Debug|Win32
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Debug|x86.Build.0 = Debug|Win32
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x64.ActiveCfg = Release|x64
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x64.Build.0 = Release|x64
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x86.ActiveCfg = Release|Win32
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -706,6 +716,7 @@ Global
 		{0260B2E4-81E3-47BD-836A-966A22A33938} = {F63A252F-9108-40D2-BB25-7FACE3D8EAD7}
 		{65DC8735-81FC-4272-8003-4071024A0E2C} = {DFB4FC6D-21C8-45C4-88EF-87B8B1B8AF21}
 		{ED78B440-5AB3-4261-843C-AAC4A7FD261F} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
+		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
