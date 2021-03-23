@@ -16,7 +16,7 @@ RefractionDemo::RefractionDemo(HINSTANCE hInstance)
 	mBoxIndexOffset(0), mGridIndexOffset(0), mSphereIndexOffset(0), mCylinderIndexOffset(0),
     mLightCount(0), mSkullVB(0), mSkullIB(0), mSky(0)
 {
-	mMainWndCaption = L"Cube Map Demo";
+	mMainWndCaption = L"Refraction Demo";
 
 	mLastMousePos.x = 0;
 	mLastMousePos.y = 0;
