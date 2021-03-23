@@ -108,6 +108,7 @@ Sky::~Sky()
 {
     ReleaseCOM(mVB);
     ReleaseCOM(mIB);
+    ReleaseCOM(mMatrixBuffer);
     ReleaseCOM(mInputLayout);
     ReleaseCOM(mCubeMapSRV);
     ReleaseCOM(mCubeMapSS);
