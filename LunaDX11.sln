@@ -81,6 +81,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\Multitexture.hlsl = Shaders\Multitexture.hlsl
 		Shaders\NormalVisualization.hlsl = Shaders\NormalVisualization.hlsl
 		Shaders\OverdrawQuad.hlsl = Shaders\OverdrawQuad.hlsl
+		Shaders\Refraction.hlsl = Shaders\Refraction.hlsl
 		Shaders\SkyBox.hlsl = Shaders\SkyBox.hlsl
 		Shaders\SubdivideIcosahedron.hlsl = Shaders\SubdivideIcosahedron.hlsl
 		Shaders\TessExamples.hlsl = Shaders\TessExamples.hlsl
@@ -200,6 +201,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CubeMapDemo", "Source\CH17\CubeMapDemo\CubeMapDemo.vcxproj", "{ED78B440-5AB3-4261-843C-AAC4A7FD261F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicCubeMap", "Source\CH17\DynamicCubeMap\DynamicCubeMap.vcxproj", "{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RefractionDemo", "Source\CH17\RefractionDemo\RefractionDemo.vcxproj", "{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -657,6 +660,14 @@ Global
 		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x64.Build.0 = Release|x64
 		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x86.ActiveCfg = Release|Win32
 		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3}.Release|x86.Build.0 = Release|Win32
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Debug|x64.ActiveCfg = Debug|x64
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Debug|x64.Build.0 = Debug|x64
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Debug|x86.ActiveCfg = Debug|Win32
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Debug|x86.Build.0 = Debug|Win32
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Release|x64.ActiveCfg = Release|x64
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Release|x64.Build.0 = Release|x64
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Release|x86.ActiveCfg = Release|Win32
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -717,6 +728,7 @@ Global
 		{65DC8735-81FC-4272-8003-4071024A0E2C} = {DFB4FC6D-21C8-45C4-88EF-87B8B1B8AF21}
 		{ED78B440-5AB3-4261-843C-AAC4A7FD261F} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
 		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
+		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}
