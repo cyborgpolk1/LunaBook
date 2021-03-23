@@ -18,6 +18,12 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DynamicCubeMap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DynamicCubeMap.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2583bdc0-f8b6-4339-8d3d-9a7f8d526ac3}</ProjectGuid>
     <RootNamespace>DynamicCubeMap</RootNamespace>
