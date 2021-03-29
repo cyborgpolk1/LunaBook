@@ -92,7 +92,7 @@ Sky::Sky(ID3D11Device* device, const std::wstring& cubemapFilename, float skySph
     //
     // Create Rasterizer and Depth-Stencil States
     //
-    D3D11_DEPTH_STENCIL_DESC dsDesc;
+    D3D11_DEPTH_STENCIL_DESC dsDesc = { 0 };
     dsDesc.DepthEnable = true;
     dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
     dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
