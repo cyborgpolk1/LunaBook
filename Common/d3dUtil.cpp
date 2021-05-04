@@ -1,4 +1,63 @@
 #include "d3dUtil.h"
+#include "DDSTextureLoader.h"
+
+void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M)
+{
+    //
+    // Left
+    //
+    planes[0].x = M.m[0][3] + M.m[0][0];
+    planes[0].y = M.m[1][3] + M.m[1][0];
+    planes[0].z = M.m[2][3] + M.m[2][0];
+    planes[0].w = M.m[3][3] + M.m[3][0];
+
+    //
+    // Right
+    //
+    planes[1].x = M.m[0][3] - M.m[0][0];
+    planes[1].y = M.m[1][3] - M.m[1][0];
+    planes[1].z = M.m[2][3] - M.m[2][0];
+    planes[1].w = M.m[3][3] - M.m[3][0];
+
+    //
+    // Bottom
+    //
+    planes[2].x = M.m[0][3] + M.m[0][1];
+    planes[2].y = M.m[1][3] + M.m[1][1];
+    planes[2].z = M.m[2][3] + M.m[2][1];
+    planes[2].w = M.m[3][3] + M.m[3][1];
+
+    //
+    // Top
+    //
+    planes[3].x = M.m[0][3] - M.m[0][1];
+    planes[3].y = M.m[1][3] - M.m[1][1];
+    planes[3].z = M.m[2][3] - M.m[2][1];
+    planes[3].w = M.m[3][3] - M.m[3][1];
+
+    //
+    // Near
+    //
+    planes[4].x = M.m[0][2];
+    planes[4].y = M.m[1][2];
+    planes[4].z = M.m[2][2];
+    planes[4].w = M.m[3][2];
+
+    //
+    // Far
+    //
+    planes[5].x = M.m[0][3] - M.m[0][2];
+    planes[5].y = M.m[1][3] - M.m[1][2];
+    planes[5].z = M.m[2][3] - M.m[2][2];
+    planes[5].w = M.m[3][3] - M.m[3][2];
+
+    // Normalize the plane equations.
+    for (int i = 0; i < 6; ++i)
+    {
+        XMVECTOR v = XMPlaneNormalize(XMLoadFloat4(&planes[i]));
+        XMStoreFloat4(&planes[i], v);
+    }
+}
 
 ID3DBlob* ShaderHelper::CompileShader(LPCWSTR filename, LPCSTR entry, LPCSTR target, const D3D_SHADER_MACRO* defines)
 {
@@ -103,4 +162,73 @@ std::wstring ExePath() {
     GetModuleFileName(NULL, buffer, MAX_PATH);
     std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
     return std::wstring(buffer).substr(0, pos + 1);
+}
+
+ID3D11ShaderResourceView* D3DHelper::CreateTexture2DArraySRV(ID3D11Device* device, ID3D11DeviceContext* deviceContext, std::vector<std::wstring>& filenames)
+{
+    UINT size = filenames.size();
+
+    std::vector<ID3D11Texture2D*> srcTex(size);
+    for (UINT i = 0; i < size; ++i)
+    {
+        HR(CreateDDSTextureFromFileEx(device, filenames[i].c_str(),
+            0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0, false,
+            (ID3D11Resource**)&srcTex[i], 0));
+    }
+
+    D3D11_TEXTURE2D_DESC texElementsDesc;
+    srcTex[0]->GetDesc(&texElementsDesc);
+
+    D3D11_TEXTURE2D_DESC texArrayDesc;
+    texArrayDesc.Width = texElementsDesc.Width;
+    texArrayDesc.Height = texElementsDesc.Height;
+    texArrayDesc.MipLevels = texElementsDesc.MipLevels;
+    texArrayDesc.ArraySize = filenames.size();
+    texArrayDesc.Format = texElementsDesc.Format;
+    texArrayDesc.SampleDesc.Count = 1;
+    texArrayDesc.SampleDesc.Quality = 0;
+    texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+    texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    texArrayDesc.CPUAccessFlags = 0;
+    texArrayDesc.MiscFlags = 0;
+
+    ID3D11Texture2D* texArray = 0;
+    HR(device->CreateTexture2D(&texArrayDesc, 0, &texArray));
+
+    for (UINT texElement = 0; texElement < size; ++texElement)
+    {
+        for (UINT mipLevel = 0; mipLevel < texElementsDesc.MipLevels; ++mipLevel)
+        {
+            D3D11_MAPPED_SUBRESOURCE mappedTex2D;
+            HR(deviceContext->Map(srcTex[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D));
+
+            deviceContext->UpdateSubresource(
+                texArray,
+                D3D11CalcSubresource(mipLevel, texElement, texElementsDesc.MipLevels),
+                0,
+                mappedTex2D.pData,
+                mappedTex2D.RowPitch,
+                mappedTex2D.DepthPitch);
+
+            deviceContext->Unmap(srcTex[texElement], mipLevel);
+        }
+    }
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+    viewDesc.Format = texArrayDesc.Format;
+    viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+    viewDesc.Texture2DArray.MostDetailedMip = 0;
+    viewDesc.Texture2DArray.MipLevels = texArrayDesc.MipLevels;
+    viewDesc.Texture2DArray.FirstArraySlice = 0;
+    viewDesc.Texture2DArray.ArraySize = size;
+
+    ID3D11ShaderResourceView* srv;
+    HR(device->CreateShaderResourceView(texArray, &viewDesc, &srv));
+
+    ReleaseCOM(texArray);
+
+    for (UINT i = 0; i < size; ++i)
+        ReleaseCOM(srcTex[i]);
+
+    return srv;
 }

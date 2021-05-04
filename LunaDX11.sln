@@ -86,6 +86,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\Refraction.hlsl = Shaders\Refraction.hlsl
 		Shaders\SkyBox.hlsl = Shaders\SkyBox.hlsl
 		Shaders\SubdivideIcosahedron.hlsl = Shaders\SubdivideIcosahedron.hlsl
+		Shaders\Terrain.hlsl = Shaders\Terrain.hlsl
 		Shaders\TessExamples.hlsl = Shaders\TessExamples.hlsl
 		Shaders\TessIcosahedron.hlsl = Shaders\TessIcosahedron.hlsl
 		Shaders\TessQuad.hlsl = Shaders\TessQuad.hlsl
@@ -207,6 +208,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RefractionDemo", "Source\CH17\RefractionDemo\RefractionDemo.vcxproj", "{6DA31653-39BC-4C79-9A96-F9FC08C9BA05}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMapDemo", "Source\CH18\NormalMapDemo\NormalMapDemo.vcxproj", "{1524CE6E-522C-4409-A30D-8FD2A49E1A48}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TerrainDemo", "Source\CH19\TerrainDemo\TerrainDemo.vcxproj", "{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -680,6 +683,14 @@ Global
 		{1524CE6E-522C-4409-A30D-8FD2A49E1A48}.Release|x64.Build.0 = Release|x64
 		{1524CE6E-522C-4409-A30D-8FD2A49E1A48}.Release|x86.ActiveCfg = Release|Win32
 		{1524CE6E-522C-4409-A30D-8FD2A49E1A48}.Release|x86.Build.0 = Release|Win32
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Debug|x64.ActiveCfg = Debug|x64
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Debug|x64.Build.0 = Debug|x64
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Debug|x86.ActiveCfg = Debug|Win32
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Debug|x86.Build.0 = Debug|Win32
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Release|x64.ActiveCfg = Release|x64
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Release|x64.Build.0 = Release|x64
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Release|x86.ActiveCfg = Release|Win32
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -742,6 +753,7 @@ Global
 		{2583BDC0-F8B6-4339-8D3D-9A7F8D526AC3} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
 		{6DA31653-39BC-4C79-9A96-F9FC08C9BA05} = {E9474810-F92F-43DA-B820-5D32B4D3DC7B}
 		{1524CE6E-522C-4409-A30D-8FD2A49E1A48} = {58EC160D-B9D2-4F86-B0BF-21E7701E2D3B}
+		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4} = {21A9EC84-BCA3-44EE-B7D8-681B988543C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}

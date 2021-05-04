@@ -6,9 +6,12 @@
 #include <crtdbg.h>
 #endif
 
+#define _XM_NO_INTRINSICS_
+
 #include <d3d11.h>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 
@@ -40,6 +43,9 @@ using namespace DirectX;
 #define ReleaseCOM(x) { if(x){ x->Release(); x = 0; } }
 
 #define SafeDelete(x) { delete x; x = 0; }
+
+// Order: left, right, bottom, top, near, far
+void ExtractFrustumPlanes(XMFLOAT4 planes[6], CXMMATRIX M);
 
 namespace Colors
 {
@@ -77,5 +83,10 @@ enum BasicEffectOptions
 };
 
 std::wstring ExePath();
+
+namespace D3DHelper
+{
+    ID3D11ShaderResourceView* CreateTexture2DArraySRV(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<std::wstring>& filenames);
+};
 
 #endif // D3DUTIL_H

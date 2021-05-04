@@ -30,6 +30,7 @@
     <ClInclude Include="LightHelper.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Sky.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Waves.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
@@ -43,6 +44,7 @@
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="MathHelpher.cpp" />
     <ClCompile Include="Sky.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Waves.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
