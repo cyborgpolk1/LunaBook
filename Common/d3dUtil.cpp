@@ -131,6 +131,15 @@ void ShaderHelper::CreateShader(ID3D11Device* device, ID3D11GeometryShader** sha
     ReleaseCOM(compiledShader);
 }
 
+void ShaderHelper::CreateShader(ID3D11Device* device, ID3D11GeometryShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines, const D3D11_SO_DECLARATION_ENTRY* soEntries, UINT soEntriesSize)
+{
+    ID3D10Blob* compiledShader = CompileShader(filename, entry, "gs_5_0", defines);
+
+    HR(device->CreateGeometryShaderWithStreamOutput(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), soEntries, soEntriesSize, NULL, 0, 0, NULL, shader));
+
+    ReleaseCOM(compiledShader);
+}
+
 void ShaderHelper::CreateShader(ID3D11Device* device, ID3D11HullShader** shader, LPCWSTR filename, LPCSTR entry, const D3D_SHADER_MACRO* defines)
 {
     ID3D10Blob* compiledShader = CompileShader(filename, entry, "hs_5_0", defines);
