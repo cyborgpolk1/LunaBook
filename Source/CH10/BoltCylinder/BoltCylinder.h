@@ -14,13 +14,13 @@ struct Vertex
 	XMFLOAT2 Tex;
 };
 
-struct PerObjectBuffer
+struct alignas(16) PerObjectBuffer
 {
-	XMMATRIX World;
-	XMMATRIX WorldInvTranspose;
-	XMMATRIX WorldViewProj;
-	XMMATRIX TextureTransform;
-	Material Mat;
+    XMMATRIX World;
+    XMMATRIX WorldInvTranspose;
+    XMMATRIX WorldViewProj;
+    XMMATRIX TextureTransform;
+    Material Mat;
     int Options;
 };
 

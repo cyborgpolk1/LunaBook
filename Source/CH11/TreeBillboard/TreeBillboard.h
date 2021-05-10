@@ -19,7 +19,7 @@ struct TreeVertex
 	XMFLOAT2 Size;
 };
 
-struct PerObjectBuffer
+struct alignas(16) PerObjectBuffer
 {
 	XMMATRIX World;
 	XMMATRIX WorldInvTranspose;

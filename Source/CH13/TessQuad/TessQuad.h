@@ -2,7 +2,7 @@
 
 #include "D3DApp.h"
 
-struct MatrixBuffer
+struct alignas(16) MatrixBuffer
 {
     XMMATRIX World;
     XMMATRIX WorldViewProj;

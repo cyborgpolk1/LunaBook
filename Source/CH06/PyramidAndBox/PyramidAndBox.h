@@ -10,9 +10,9 @@ struct Vertex
 	XMFLOAT4 Color;
 };
 
-struct MatrixBuffer
+struct alignas(16) MatrixBuffer
 {
-	XMMATRIX WorldViewProj;
+    XMMATRIX WorldViewProj;
 	float Time;
 };
 

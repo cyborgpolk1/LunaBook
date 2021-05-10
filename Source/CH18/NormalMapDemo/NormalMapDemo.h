@@ -36,7 +36,7 @@ struct alignas(16) PerFrameBuffer
     float MaxTessFactor;
 };
 
-struct PerObjectBuffer
+struct alignas(16) PerObjectBuffer
 {
 	XMMATRIX World;
 	XMMATRIX WorldInvTranspose;

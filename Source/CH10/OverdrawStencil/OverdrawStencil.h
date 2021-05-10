@@ -14,7 +14,7 @@ struct Vertex
 	XMFLOAT2 Tex;
 };
 
-struct PerObjectBuffer
+struct alignas(16) PerObjectBuffer
 {
 	XMMATRIX World;
 	XMMATRIX WorldInvTranspose;

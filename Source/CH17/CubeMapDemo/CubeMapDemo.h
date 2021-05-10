@@ -30,13 +30,13 @@ struct PerFrameBuffer
 	XMFLOAT3 pad;
 };
 
-struct PerObjectBuffer
+struct alignas(16) PerObjectBuffer
 {
-	XMMATRIX World;
-	XMMATRIX WorldInvTranspose;
-	XMMATRIX WorldViewProj;
-	XMMATRIX gTexTransform;
-	Material Mat;
+    XMMATRIX World;
+    XMMATRIX WorldInvTranspose;
+    XMMATRIX WorldViewProj;
+    XMMATRIX gTexTransform;
+    Material Mat;
     int Options;
 };
 

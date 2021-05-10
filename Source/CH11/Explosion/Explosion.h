@@ -8,7 +8,7 @@ struct Vertex
 	XMFLOAT3 Pos;
 };
 
-struct ConstantBuffer
+struct alignas(16) ConstantBuffer
 {
 	XMMATRIX WorldViewProj;
 	float Time;
