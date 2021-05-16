@@ -188,21 +188,20 @@ void NormalMapDemo::DrawScene()
     case RenderOptionsBasic:
         md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
-        md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
         break;
     case RenderOptionsNormalMap:
         md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         md3dImmediateContext->VSSetShader(mNormalVS, 0, 0);
-        md3dImmediateContext->PSSetShader(mNormalPS, 0, 0);
         break;
     case RenderOptionsDisplacementMap:
         md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
         md3dImmediateContext->VSSetShader(mDispVS, 0, 0);
         md3dImmediateContext->HSSetShader(mDispHS, 0, 0);
         md3dImmediateContext->DSSetShader(mDispDS, 0, 0);
-        md3dImmediateContext->PSSetShader(mDispPS, 0, 0);
         break;
     }
+
+    md3dImmediateContext->PSSetShader(mTexPS, 0, 0);
 
 
 	UINT stride = sizeof(TexVertex);
@@ -580,12 +579,10 @@ void NormalMapDemo::BuildFX()
 	ShaderHelper::CreateShader(md3dDevice, &mTexPS, ExePath().append(L"../../../Shaders/BasicEffectTex.hlsl").c_str(), "PS", basicEffectDefines);
 
     ShaderHelper::CreateShader(md3dDevice, &mNormalVS, ExePath().append(L"../../../Shaders/NormalMap.hlsl").c_str(), "VS", 0, &mShapeInputLayout, vertexDesc, 4);
-    ShaderHelper::CreateShader(md3dDevice, &mNormalPS, ExePath().append(L"../../../Shaders/NormalMap.hlsl").c_str(), "PS", basicEffectDefines);
 
     ShaderHelper::CreateShader(md3dDevice, &mDispVS, ExePath().append(L"../../../Shaders/DisplacementMap.hlsl").c_str(), "VS", 0);
     ShaderHelper::CreateShader(md3dDevice, &mDispHS, ExePath().append(L"../../../Shaders/DisplacementMap.hlsl").c_str(), "HS", 0);
     ShaderHelper::CreateShader(md3dDevice, &mDispDS, ExePath().append(L"../../../Shaders/DisplacementMap.hlsl").c_str(), "DS", 0);
-    ShaderHelper::CreateShader(md3dDevice, &mDispPS, ExePath().append(L"../../../Shaders/DisplacementMap.hlsl").c_str(), "PS", 0);
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	matrixBufferDesc.ByteWidth = sizeof(PerObjectBuffer);

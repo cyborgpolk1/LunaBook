@@ -185,7 +185,7 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 }
 
 static const float SMAP_SIZE = 2048.0f;
-static const float SMAP_DX = 1.0f | SMAP_SIZE;
+static const float SMAP_DX = 1.0f / SMAP_SIZE;
 
 float CalcShadowFactor(SamplerComparisonState samShadow, Texture2D shadowMap, float4 shadowPosH)
 {

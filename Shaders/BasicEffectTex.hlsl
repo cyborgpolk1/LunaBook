@@ -32,6 +32,7 @@ cbuffer cbPerObject : register(b1)
 
 Texture2D gTex : register(t0);
 TextureCube gCubeMap : register(t1);
+Texture2D gNormalMap : register(t2);
 
 SamplerState gSample : register(s0);
 
@@ -48,6 +49,7 @@ struct VertexOut
     float3 PosW     : POSITION;
     float3 NormalW  : NORMAL;
 	float2 TexC		: TEXCOORD;
+    float3 TangentW : TANGENT;
 };
 
 VertexOut VS(VertexIn vin)
@@ -62,6 +64,8 @@ VertexOut VS(VertexIn vin)
     vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 
 	vout.TexC = mul(float4(vin.TexC, 0.0f, 1.0f), gTexTransform).xy;
+    
+    vout.TangentW = 0.0f;
 
     return vout;
 }
@@ -91,6 +95,17 @@ float4 PS(VertexOut pin) : SV_Target
     toEye /= distToEye;
 
     //
+    // Normal mapping (any geometry that uses a normal map won't have a zero tangent)
+    //
+    float3 bumpedNormalW = pin.NormalW;
+    
+    if (length(pin.TangentW) != 0.0f)
+    {
+        float3 normalMapSample = gNormalMap.Sample(gSample, pin.TexC).rgb;
+        bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW);
+    }
+
+    //
     // Lighting.
     //
     float4 litColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -107,7 +122,7 @@ float4 PS(VertexOut pin) : SV_Target
         for (int i = 0; i < NUM_LIGHTS; ++i)
         {
             float4 A, D, S;
-            ComputeDirectionalLight(gMaterial, gDirLights[i], pin.NormalW, toEye, A, D, S);
+            ComputeDirectionalLight(gMaterial, gDirLights[i], bumpedNormalW, toEye, A, D, S);
 
             ambient += A;
             diffuse += D;
@@ -120,7 +135,7 @@ float4 PS(VertexOut pin) : SV_Target
         if (gOptions & 0x04)
         {
             float3 incident = -toEye;
-            float3 reflectionVector = reflect(incident, pin.NormalW);
+            float3 reflectionVector = reflect(incident, bumpedNormalW);
             float4 reflectionColor = gCubeMap.Sample(gSample, reflectionVector);
         
             litColor += gMaterial.Reflect * reflectionColor;
@@ -138,7 +153,7 @@ float4 PS(VertexOut pin) : SV_Target
     litColor = float4(0.1f, 0.1f, 0.1f, 1.0f);
 #else
     // Common to take alpha from diffuse material.
-        litColor.a = gMaterial.Diffuse.a * texColor.a;
+    litColor.a = gMaterial.Diffuse.a * texColor.a;
 #endif
 
     return litColor;
