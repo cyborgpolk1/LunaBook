@@ -30,6 +30,7 @@
     <ClInclude Include="LightHelper.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="ParticleSystem.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Sky.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Waves.h" />
@@ -45,6 +46,7 @@
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="MathHelpher.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Waves.cpp" />
