@@ -143,6 +143,15 @@ void ParticleDemo::UpdateScene(float dt)
         mCamera.SetPosition(camPos.x, y + 2.0f, camPos.z);
     }
 
+    //
+    // Reset particle systems.
+    //
+    if (GetAsyncKeyState('R') & 0x8000)
+    {
+        mFireSystem.Reset();
+        mRainSystem.Reset();
+    }
+
     mFireSystem.Update(dt, mTimer.TotalTime());
     mRainSystem.Update(dt, mTimer.TotalTime());
 
