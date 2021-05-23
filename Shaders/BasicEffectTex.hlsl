@@ -26,7 +26,8 @@ cbuffer cbPerObject : register(b1)
     // Multiple options
     // Use Texture = 0x01
     // Use Alpha Clipping = 0x02
-    // Enable Reflections (env mapping) = 0x03
+    // Enable Reflections (env mapping) = 0x04
+    // Use Normal Map = 0x08
     int gOptions = 0x01;
 };
 
@@ -99,7 +100,7 @@ float4 PS(VertexOut pin) : SV_Target
     //
     float3 bumpedNormalW = pin.NormalW;
     
-    if (length(pin.TangentW) != 0.0f)
+    if (gOptions & 0x08)
     {
         float3 normalMapSample = gNormalMap.Sample(gSample, pin.TexC).rgb;
         bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, pin.NormalW, pin.TangentW);

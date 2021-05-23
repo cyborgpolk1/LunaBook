@@ -183,21 +183,26 @@ void NormalMapDemo::DrawScene()
 
 	md3dImmediateContext->IASetInputLayout(mShapeInputLayout);
 
+    int useOtherMaps = 0;
+
     switch (mRenderOptions)
     {
     case RenderOptionsBasic:
         md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         md3dImmediateContext->VSSetShader(mTexVS, 0, 0);
+        useOtherMaps = 0;
         break;
     case RenderOptionsNormalMap:
         md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         md3dImmediateContext->VSSetShader(mNormalVS, 0, 0);
+        useOtherMaps = USE_NORMAL_MAP;
         break;
     case RenderOptionsDisplacementMap:
         md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
         md3dImmediateContext->VSSetShader(mDispVS, 0, 0);
         md3dImmediateContext->HSSetShader(mDispHS, 0, 0);
         md3dImmediateContext->DSSetShader(mDispDS, 0, 0);
+        useOtherMaps = USE_NORMAL_MAP;
         break;
     }
 
@@ -242,7 +247,7 @@ void NormalMapDemo::DrawScene()
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->gTexTransform = XMMatrixTranspose(XMMatrixScaling(8.0f, 10.0f, 1.0f));
 	dataPtr->Mat = mGridMat;
-    dataPtr->Options = USE_TEXTURES;
+    dataPtr->Options = USE_TEXTURES | useOtherMaps;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
 	md3dImmediateContext->DSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -263,7 +268,7 @@ void NormalMapDemo::DrawScene()
 	dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	dataPtr->gTexTransform = XMMatrixTranspose(XMMatrixScaling(2.0f, 1.0f, 1.0f));
 	dataPtr->Mat = mBoxMat;
-    dataPtr->Options = USE_TEXTURES;
+    dataPtr->Options = USE_TEXTURES | useOtherMaps;
 	md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 	md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
     md3dImmediateContext->DSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -286,7 +291,7 @@ void NormalMapDemo::DrawScene()
 		dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 		dataPtr->gTexTransform = XMMatrixTranspose(XMMatrixScaling(1.0f, 2.0f, 1.0f));
 		dataPtr->Mat = mCylinderMat;
-        dataPtr->Options = USE_TEXTURES;
+        dataPtr->Options = USE_TEXTURES | useOtherMaps;
 		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 		md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
         md3dImmediateContext->DSSetConstantBuffers(1, 1, &mPerObjectBuffer);
@@ -323,7 +328,7 @@ void NormalMapDemo::DrawScene()
 		dataPtr->WorldInvTranspose = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 		dataPtr->gTexTransform = XMMatrixIdentity();
 		dataPtr->Mat = mSphereMat;
-        dataPtr->Options = USE_TEXTURES | USE_ENV_MAPPING;
+        dataPtr->Options = USE_TEXTURES | USE_ENV_MAPPING; // | useOtherMaps;
 		md3dImmediateContext->Unmap(mPerObjectBuffer, 0);
 		md3dImmediateContext->VSSetConstantBuffers(1, 1, &mPerObjectBuffer);
         //md3dImmediateContext->DSSetConstantBuffers(1, 1, &mPerObjectBuffer);
