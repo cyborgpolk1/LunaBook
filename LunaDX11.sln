@@ -87,6 +87,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{61B6
 		Shaders\OverdrawQuad.hlsl = Shaders\OverdrawQuad.hlsl
 		Shaders\Rain.hlsl = Shaders\Rain.hlsl
 		Shaders\Refraction.hlsl = Shaders\Refraction.hlsl
+		Shaders\ShadowMap.hlsl = Shaders\ShadowMap.hlsl
 		Shaders\SkyBox.hlsl = Shaders\SkyBox.hlsl
 		Shaders\SubdivideIcosahedron.hlsl = Shaders\SubdivideIcosahedron.hlsl
 		Shaders\Terrain.hlsl = Shaders\Terrain.hlsl
@@ -215,6 +216,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TerrainDemo", "Source\CH19\TerrainDemo\TerrainDemo.vcxproj", "{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleDemo", "Source\CH20\ParticleDemo\ParticleDemo.vcxproj", "{146C95F8-83D5-45D2-A2DC-62E5D5A01B36}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowMapDemo", "Source\CH21\ShadowMapDemo\ShadowMapDemo.vcxproj", "{C7388325-8391-48B4-A4FE-D0A803F0C433}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -704,6 +707,14 @@ Global
 		{146C95F8-83D5-45D2-A2DC-62E5D5A01B36}.Release|x64.Build.0 = Release|x64
 		{146C95F8-83D5-45D2-A2DC-62E5D5A01B36}.Release|x86.ActiveCfg = Release|Win32
 		{146C95F8-83D5-45D2-A2DC-62E5D5A01B36}.Release|x86.Build.0 = Release|Win32
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Debug|x64.ActiveCfg = Debug|x64
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Debug|x64.Build.0 = Debug|x64
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Debug|x86.ActiveCfg = Debug|Win32
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Debug|x86.Build.0 = Debug|Win32
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Release|x64.ActiveCfg = Release|x64
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Release|x64.Build.0 = Release|x64
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Release|x86.ActiveCfg = Release|Win32
+		{C7388325-8391-48B4-A4FE-D0A803F0C433}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -768,6 +779,7 @@ Global
 		{1524CE6E-522C-4409-A30D-8FD2A49E1A48} = {58EC160D-B9D2-4F86-B0BF-21E7701E2D3B}
 		{A8F12BBA-5CC3-464E-BB92-1ED8B97895B4} = {21A9EC84-BCA3-44EE-B7D8-681B988543C2}
 		{146C95F8-83D5-45D2-A2DC-62E5D5A01B36} = {E85131A4-086A-4AA0-8184-63B7A3CB81CF}
+		{C7388325-8391-48B4-A4FE-D0A803F0C433} = {F2FC4CE4-80BD-40AC-B927-F7BEF271A2FD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}

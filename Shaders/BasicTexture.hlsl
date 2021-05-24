@@ -33,3 +33,9 @@ float4 PS(VertexOut pin) : SV_Target
 {
     return gTex.Sample(gSample, pin.TexC);
 }
+
+float4 GrayscalePS(VertexOut pin) : SV_TARGET
+{
+    float4 c = gTex.Sample(gSample, pin.TexC).r;
+    return float4(c.rrr, 1.0f);
+}

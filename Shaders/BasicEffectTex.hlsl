@@ -95,11 +95,7 @@ float4 PS(VertexOut pin) : SV_Target
     // Normalize.
     toEye /= distToEye;
 
-    //
-    // Normal mapping (any geometry that uses a normal map won't have a zero tangent)
-    //
     float3 bumpedNormalW = pin.NormalW;
-    
     if (gOptions & 0x08)
     {
         float3 normalMapSample = gNormalMap.Sample(gSample, pin.TexC).rgb;
