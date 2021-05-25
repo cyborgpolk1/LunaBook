@@ -42,7 +42,7 @@ BoundingBox Octree::BuildAABB()
 
     BoundingBox bounds;
     XMVECTOR C = 0.5f*(vmin + vmax);
-    XMVECTOR E = 0.5f*(vmin - vmax);
+    XMVECTOR E = 0.5f*(vmax - vmin);
 
     XMStoreFloat3(&bounds.Center, C);
     XMStoreFloat3(&bounds.Extents, E);
