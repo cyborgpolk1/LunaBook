@@ -28,12 +28,15 @@
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GeometryGenerator.h" />
     <ClInclude Include="LightHelper.h" />
+    <ClInclude Include="M3DLoader.h" />
     <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="MeshGeometry.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Sky.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TextuerMgr.h" />
     <ClInclude Include="Waves.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
@@ -45,12 +48,15 @@
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
+    <ClCompile Include="M3DLoader.cpp" />
     <ClCompile Include="MathHelpher.cpp" />
+    <ClCompile Include="MeshGeometry.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TextureMgr.cpp" />
     <ClCompile Include="Waves.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
