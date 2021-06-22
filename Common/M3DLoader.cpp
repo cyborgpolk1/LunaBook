@@ -1,6 +1,6 @@
 #include "M3DLoader.h"
 
-bool M3DLoader::LoadM3d(const std::string& filename,
+bool M3DLoader::LoadM3d(const std::wstring& filename,
     std::vector<M3dVertex>& vertices,
     std::vector<USHORT>& indices,
     std::vector < MeshGeometry::Subset > &subsets,
@@ -43,6 +43,7 @@ void M3DLoader::ReadMaterials(std::ifstream& fin, UINT numMaterials, std::vector
 
     std::string diffuseMapName;
     std::string normalMapName;
+    std::string effectTypeName;
 
     fin >> ignore;
     for (UINT i = 0; i < numMaterials; ++i)
@@ -54,16 +55,18 @@ void M3DLoader::ReadMaterials(std::ifstream& fin, UINT numMaterials, std::vector
         fin >> ignore >> currMat.Specular.w;
         fin >> ignore >> currMat.Reflect.x >> currMat.Reflect.y >> currMat.Reflect.z;
         fin >> ignore >> mats[i].AlphaClip;
-        fin >> ignore >> mats[i].EffectTypeName;
+        fin >> ignore >> effectTypeName;
         fin >> ignore >> diffuseMapName;
         fin >> ignore >> normalMapName;
 
         mats[i].DiffuseMapName.resize(diffuseMapName.size(), ' ');
         mats[i].NormalMapName.resize(normalMapName.size(), ' ');
+        mats[i].EffectTypeName.resize(effectTypeName.size(), ' ');
 
         // convert to wstring
         std::copy(diffuseMapName.begin(), diffuseMapName.end(), mats[i].DiffuseMapName.begin());
         std::copy(normalMapName.begin(), normalMapName.end(), mats[i].NormalMapName.begin());
+        std::copy(effectTypeName.begin(), effectTypeName.end(), mats[i].EffectTypeName.begin());
     }
 }
 

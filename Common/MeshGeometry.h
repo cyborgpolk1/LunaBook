@@ -24,7 +24,25 @@ public:
     ~MeshGeometry();
 
     template <typename VertexType>
-    void SetVertices(ID3D11Device* device, const VertexType* vertices, UINT count);
+    void SetVertices(ID3D11Device* device, const VertexType* vertices, UINT count)
+    {
+        ReleaseCOM(mVB);
+
+        mVertexStride = sizeof(VertexType);
+
+        D3D11_BUFFER_DESC vbd;
+        vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vbd.ByteWidth = sizeof(VertexType) * count;
+        vbd.CPUAccessFlags = 0;
+        vbd.MiscFlags = 0;
+        vbd.StructureByteStride = 0;
+        vbd.Usage = D3D11_USAGE_IMMUTABLE;
+
+        D3D11_SUBRESOURCE_DATA vinitData;
+        vinitData.pSysMem = vertices;
+
+        HR(device->CreateBuffer(&vbd, &vinitData, &mVB));
+    }
 
     void SetIndices(ID3D11Device* device, const USHORT* indices, UINT count);
 

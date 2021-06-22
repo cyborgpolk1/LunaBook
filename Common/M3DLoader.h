@@ -8,7 +8,7 @@ struct M3dMaterial
 {
     Material Mat;
     bool AlphaClip;
-    std::string EffectTypeName;
+    std::wstring EffectTypeName;
     std::wstring DiffuseMapName;
     std::wstring NormalMapName;
 };
@@ -24,7 +24,7 @@ struct M3dVertex
 class M3DLoader
 {
 public:
-    bool LoadM3d(const std::string& filename,
+    bool LoadM3d(const std::wstring& filename,
         std::vector<M3dVertex>& vertices,
         std::vector<USHORT>& indices,
         std::vector<MeshGeometry::Subset>& subsets,
