@@ -57,7 +57,7 @@ void BoneAnimation::Interpolate(float t, XMFLOAT4X4& M) const
                 XMVECTOR s1 = XMLoadFloat3(&Keyframes[i + 1].Scale);
 
                 XMVECTOR p0 = XMLoadFloat3(&Keyframes[i].Translation);
-                XMVECTOR p1 = XMLoadFloat3(&Keyframes[i].Translation);
+                XMVECTOR p1 = XMLoadFloat3(&Keyframes[i + 1].Translation);
 
                 XMVECTOR q0 = XMLoadFloat4(&Keyframes[i].RotationQuat);
                 XMVECTOR q1 = XMLoadFloat4(&Keyframes[i + 1].RotationQuat);
