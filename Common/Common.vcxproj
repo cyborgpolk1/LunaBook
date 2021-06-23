@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationHelper.h" />
     <ClInclude Include="BasicModel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonLibs.h" />
@@ -43,6 +44,7 @@
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationHelper.cpp" />
     <ClCompile Include="BasicModel.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D3DApp.cpp" />

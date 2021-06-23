@@ -77,6 +77,9 @@
     <ClInclude Include="BasicModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DApp.cpp">
@@ -137,6 +140,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BasicModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
