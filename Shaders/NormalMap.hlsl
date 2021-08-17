@@ -49,7 +49,7 @@ struct VertexOut
     float3 PosW     : POSITION;
     float3 NormalW  : NORMAL;
     float2 TexC : TEXCOORD;
-    float3 TangentW : TANGENT;
+    float4 TangentW : TANGENT;
 };
 
 VertexOut VS(VertexIn vin)
@@ -59,7 +59,7 @@ VertexOut VS(VertexIn vin)
     // Transform to world space.
     vout.PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
     vout.NormalW = mul(vin.NormalL, (float3x3) gWorldInvTranspose);
-    vout.TangentW = mul(vin.TangentL, (float3x3) gWorld);
+    vout.TangentW = float4(mul(vin.TangentL, (float3x3) gWorld), 1.0f);
     
     // Transform to homogenous clip space.
     vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);

@@ -232,6 +232,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshViewer", "MeshViewer\Me
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuatDemo", "QuatDemo\QuatDemo.vcxproj", "{E9096599-1606-428C-946C-C98292DCAEC0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkinnedMeshDemo", "SkinnedMeshDemo\SkinnedMeshDemo.vcxproj", "{4337E45D-5290-4E0B-B732-2EE95E7814CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -760,6 +762,14 @@ Global
 		{E9096599-1606-428C-946C-C98292DCAEC0}.Release|x64.Build.0 = Release|x64
 		{E9096599-1606-428C-946C-C98292DCAEC0}.Release|x86.ActiveCfg = Release|Win32
 		{E9096599-1606-428C-946C-C98292DCAEC0}.Release|x86.Build.0 = Release|Win32
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Debug|x64.ActiveCfg = Debug|x64
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Debug|x64.Build.0 = Debug|x64
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Debug|x86.ActiveCfg = Debug|Win32
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Debug|x86.Build.0 = Debug|Win32
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Release|x64.ActiveCfg = Release|x64
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Release|x64.Build.0 = Release|x64
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Release|x86.ActiveCfg = Release|Win32
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -829,6 +839,7 @@ Global
 		{3CF04BD7-8E54-4540-839C-2909F4770BA4} = {486429DE-6F85-4E04-96B2-CC89B0781263}
 		{A7623CB8-E263-43C2-B98C-8B62A6309C21} = {3A361B0A-AF84-4D45-8587-4EF370223C40}
 		{E9096599-1606-428C-946C-C98292DCAEC0} = {55EBF4C8-FA96-42D2-A0CE-C0ED40D3AFB8}
+		{4337E45D-5290-4E0B-B732-2EE95E7814CB} = {26C9787C-7935-4B6F-AAA5-1B0949D2D20C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4BB5811-5D5F-4B29-8068-C6F044E8D117}

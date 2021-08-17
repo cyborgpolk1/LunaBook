@@ -1,6 +1,7 @@
 #pragma once
 
 #include "d3dUtil.h"
+#include <map>
 
 ///<summary>
 /// A Keyframe defines the bone transformation at an instant in time.
@@ -31,4 +32,55 @@ struct BoneAnimation
     void Interpolate(float t, XMFLOAT4X4& M) const;
 
     std::vector<Keyframe> Keyframes;
+};
+
+///<summary>
+/// Examples of AnimationClips are "Walk", "Run", "Attack", "Defend".
+/// An AnimationClip requires a BoneAnimation for every bone to form
+/// the animation clip.
+///</summary>
+struct AnimationClip
+{
+    // Smallest end time over all bones in this clip.
+    float GetClipStartTime() const;
+
+    // Largest end time over all bones in this clip.
+    float GetClipEndTime() const;
+
+    // Loops over each BoneAnimation in the clip and interpolates
+    // the animation.
+    void Interpolate(float t, std::vector<XMFLOAT4X4>& boneTransforms) const;
+
+    // Animation for each bone.
+    std::vector<BoneAnimation> BoneAnimations;
+};
+
+class SkinnedData
+{
+public:
+    UINT BoneCount() const;
+
+    float GetClipStartTime(const std::string& clipName) const;
+    float GetClipEndTime(const std::string& clipName) const;
+
+    void Set(
+        std::vector<int>& boneHierarchy,
+        std::vector<XMFLOAT4X4>& boneOffsets,
+        std::map<std::string, AnimationClip>& animations);
+
+    // In a real project, you'd want to cache the result if there
+    // was a chance that you were calling this several times with
+    // the same clipName at the same timePos.
+    void GetFinalTransforms(const std::string& clipName, float timePos,
+        std::vector<XMFLOAT4X4>& finalTransforms) const;
+
+private:
+    // Gives parentIndex of ith bone. The ith bone corresponds to 
+    // the ith BoneAnimation in an animation clip.
+    std::vector<int> mBoneHierarchy;
+
+    // Offset transforms of the ith bone.
+    std::vector<XMFLOAT4X4> mBoneOffsets;
+
+    std::map<std::string, AnimationClip> mAnimations;
 };

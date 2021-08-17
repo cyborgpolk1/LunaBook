@@ -18,6 +18,11 @@ cbuffer cbPerObject : register(b1)
     float4x4 gTexTransform;
 };
 
+cbuffer cbSkinned : register(b2)
+{
+    float4x4 gBoneTransforms[96];
+};
+
 Texture2D gDiffuseMap : register(t0);
 Texture2D gNormalMap : register(t1);
 
@@ -44,6 +49,42 @@ VertexOut VS(VertexIn vin)
     vout.PosH = mul(float4(posW, 1.0f), gViewProj);
     vout.Tex = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
 
+    return vout;
+}
+
+struct SkinnedVertexIn
+{
+    float3 PosL : POSITION;
+    float3 NormalL : NORMAL;
+    float2 Tex : TEXCOORD;
+    float4 TangentL : TANGENT;
+    float3 Weights : WEIGHTS;
+    uint4 BoneIndices : BONEINDICES;
+};
+
+VertexOut SkinnedVS(SkinnedVertexIn vin)
+{
+    VertexOut vout;
+    
+    // Init array or else we get strange warnings about SV_POSITION
+    float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    weights[0] = vin.Weights.x;
+    weights[1] = vin.Weights.y;
+    weights[2] = vin.Weights.z;
+    weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+    
+    float3 posL = float3(0.0f, 0.0f, 0.0f);
+    for (int i = 0; i < 4; ++i)
+    {
+        posL += weights[i] * mul(float4(vin.PosL, 1.0f), gBoneTransforms[vin.BoneIndices[i]]).xyz;
+    }
+    
+    // Transform to homogenous clip space.
+    float3 posW = mul(float4(posL, 1.0f), gWorld).xyz;
+    vout.PosH = mul(float4(posW, 1.0f), gViewProj);
+    
+    vout.Tex = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
+    
     return vout;
 }
 

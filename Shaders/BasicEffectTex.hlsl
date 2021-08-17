@@ -50,7 +50,7 @@ struct VertexOut
     float3 PosW     : POSITION;
     float3 NormalW  : NORMAL;
 	float2 TexC		: TEXCOORD;
-    float3 TangentW : TANGENT;
+    float4 TangentW : TANGENT;
 };
 
 VertexOut VS(VertexIn vin)

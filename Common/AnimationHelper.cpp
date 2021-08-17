@@ -1,4 +1,5 @@
 #include "AnimationHelper.h"
+#include "MathHelper.h"
 
 Keyframe::Keyframe()
     : TimePos(0.0f), Translation(0.0f, 0.0f, 0.0f), Scale(1.0f, 1.0f, 1.0f),
@@ -72,5 +73,101 @@ void BoneAnimation::Interpolate(float t, XMFLOAT4X4& M) const
                 break;
             }
         }
+    }
+}
+
+float AnimationClip::GetClipStartTime() const
+{
+    float t = MathHelper::Infinity;
+    for (UINT i = 0; i < BoneAnimations.size(); ++i)
+    {
+        t = MathHelper::Min(t, BoneAnimations[i].GetStartTime());
+    }
+    return t;
+}
+
+float AnimationClip::GetClipEndTime() const
+{
+    float t = 0.0f;
+    for (UINT i = 0; i < BoneAnimations.size(); ++i)
+    {
+        t = MathHelper::Max(t, BoneAnimations[i].GetEndTime());
+    }
+    return t;
+}
+
+void AnimationClip::Interpolate(float t, std::vector<XMFLOAT4X4>& boneTransforms) const
+{
+    for (UINT i = 0; i < BoneAnimations.size(); ++i)
+    {
+        BoneAnimations[i].Interpolate(t, boneTransforms[i]);
+    }
+}
+
+UINT SkinnedData::BoneCount() const
+{
+    return mBoneHierarchy.size();
+}
+
+float SkinnedData::GetClipStartTime(const std::string& clipName) const
+{
+    auto clip = mAnimations.find(clipName);
+    return clip->second.GetClipStartTime();
+}
+
+float SkinnedData::GetClipEndTime(const std::string& clipName) const
+{
+    auto clip = mAnimations.find(clipName);
+    return clip->second.GetClipEndTime();
+}
+
+void SkinnedData::Set(std::vector<int>& boneHierarchy, std::vector<XMFLOAT4X4>& boneOffsets,
+    std::map<std::string, AnimationClip>& animations)
+{
+    mBoneHierarchy = boneHierarchy;
+    mBoneOffsets = boneOffsets;
+    mAnimations = animations;
+}
+
+void SkinnedData::GetFinalTransforms(const std::string& clipName, float timePos,
+    std::vector<XMFLOAT4X4>& finalTransforms) const
+{
+    UINT numBones = mBoneOffsets.size();
+
+    std::vector<XMFLOAT4X4> toParentTransforms(numBones);
+
+    // Interpolate all the bones of this clip at the given time instance.
+    auto clip = mAnimations.find(clipName);
+    clip->second.Interpolate(timePos, toParentTransforms);
+
+    //
+    // Traverse the hierarchy and transform all the bones to the root space.
+    //
+
+    std::vector<XMFLOAT4X4> toRootTransforms(numBones);
+
+    // The root bone has index 0. The root bone has no parent, so
+    // its toRootTransform is just its local bone transform.
+    toRootTransforms[0] = toParentTransforms[0];
+
+    // Now find the toRootTransform of the children.
+    for (UINT i = 1; i < numBones; ++i)
+    {
+        XMMATRIX toParent = XMLoadFloat4x4(&toParentTransforms[i]);
+
+        int parentIndex = mBoneHierarchy[i];
+        XMMATRIX parentToRoot = XMLoadFloat4x4(&toRootTransforms[parentIndex]);
+
+        XMMATRIX toRoot = XMMatrixMultiply(toParent, parentToRoot);
+
+        XMStoreFloat4x4(&toRootTransforms[i], toRoot);
+    }
+
+    // Premultiply by the bone offset transform to get the final transform.
+    for (UINT i = 0; i < numBones; ++i)
+    {
+        XMMATRIX offset = XMLoadFloat4x4(&mBoneOffsets[i]);
+        XMMATRIX toRoot = XMLoadFloat4x4(&toRootTransforms[i]);
+        XMStoreFloat4x4(&finalTransforms[i], XMMatrixMultiply(offset, toRoot));
     }
 }

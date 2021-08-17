@@ -31,6 +31,12 @@ cbuffer cbPerObject : register(b1)
     int gOptions;
 };
 
+cbuffer cbSkinned : register(b2)
+{
+    // Max support of 96 bones per character.
+    float4x4 gBoneTransforms[96];
+};
+
 Texture2D gTex : register(t0);
 TextureCube gCubeMap : register(t1);
 Texture2D gNormalMap : register(t2);
@@ -52,7 +58,7 @@ struct PixelIn
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
     float2 TexC : TEXCOORD0;
-    float3 TangentW : TANGENT;
+    float4 TangentW : TANGENT;
     float4 ShadowPosH : TEXCOORD1;
 };
 
@@ -92,7 +98,58 @@ PixelIn NormalVS(NormalVertexIn vin)
     // Transform to world space.
     vout.PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
     vout.NormalW = mul(vin.NormalL, (float3x3) gWorldInvTranspose);
-    vout.TangentW = mul(vin.TangentL, (float3x3) gWorld);
+    vout.TangentW = float4(mul(vin.TangentL, (float3x3) gWorld), 1.0f);
+    
+    // Transform to homogenous clip space.
+    vout.PosH = mul(float4(vout.PosW, 1.0f), gViewProj);
+    
+    // Output vertex attributes for interpolation accross triangle.
+    vout.TexC = mul(float4(vin.Tex, 0.0f, 1.0f), gTexTransform).xy;
+    
+    // Generate projective tex-coords to project shadow map onto scene.
+    vout.ShadowPosH = mul(float4(vout.PosW, 1.0f), gShadowTransform);
+    
+    return vout;
+}
+
+struct SkinnedVertexIn
+{
+    float3 PosL : POSITION;
+    float3 NormalL : NORMAL;
+    float2 Tex : TEXCOORD;
+    float4 TangentL : TANGENT;
+    float3 Weights : WEIGHTS;
+    uint4 BoneIndices : BoneIndices;
+};
+
+PixelIn SkinnedVS(SkinnedVertexIn vin)
+{
+    PixelIn vout;
+    
+    // Init array or else we get strange warnings about SV_POSITION
+    float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    weights[0] = vin.Weights.x;
+    weights[1] = vin.Weights.y;
+    weights[2] = vin.Weights.z;
+    weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+    
+    // Do vertex blending
+    float3 posL = float3(0.0f, 0.0f, 0.0f);
+    float3 normalL = float3(0.0f, 0.0f, 0.0f);
+    float3 tangentL = float3(0.0f, 0.0f, 0.0f);
+    for (int i = 0; i < 4; ++i)
+    {
+        // Asume no nonuniform scaling when transforming normals, so
+        // that we do not have to use the inverse-transpose.
+        posL += weights[i] * mul(float4(vin.PosL, 1.0f), gBoneTransforms[vin.BoneIndices[i]]).xyz;
+        normalL += weights[i] * mul(vin.NormalL, (float3x3) gBoneTransforms[vin.BoneIndices[i]]);
+        tangentL += weights[i] * mul(vin.TangentL.xyz, (float3x3) gBoneTransforms[vin.BoneIndices[i]]);
+    }
+    
+    // Transform to world space.
+    vout.PosW = mul(float4(posL, 1.0f), gWorld).xyz;
+    vout.NormalW = mul(normalL, (float3x3) gWorldInvTranspose);
+    vout.TangentW = float4(mul(tangentL, (float3x3) gWorld), vin.TangentL.w);
     
     // Transform to homogenous clip space.
     vout.PosH = mul(float4(vout.PosW, 1.0f), gViewProj);
@@ -170,7 +227,7 @@ struct HullOut
 {
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
-    float3 TangentW : TANGENT;
+    float4 TangentW : TANGENT;
     float2 Tex : TEXCOORD;
 };
 
@@ -186,7 +243,7 @@ HullOut HS(InputPatch<TessVertexOut, 3> p, uint i : SV_OutputControlPointID, uin
     // Pass through shader.
     hout.PosW = p[i].PosW;
     hout.NormalW = p[i].NormalW;
-    hout.TangentW = p[i].TangentW;
+    hout.TangentW = float4(p[i].TangentW, 1.0f);
     hout.Tex = p[i].Tex;
     
     return hout;

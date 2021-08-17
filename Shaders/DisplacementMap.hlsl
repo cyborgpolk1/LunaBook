@@ -113,7 +113,7 @@ struct HullOut
 {
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
-    float3 TangentW : TANGENT;
+    float4 TangentW : TANGENT;
     float2 Tex : TEXCOORD;
 };
 
@@ -129,7 +129,7 @@ HullOut HS(InputPatch<VertexOut, 3> p, uint i : SV_OutputControlPointID, uint pa
     // Pass through shader.
     hout.PosW = p[i].PosW;
     hout.NormalW = p[i].NormalW;
-    hout.TangentW = p[i].TangentW;
+    hout.TangentW = float4(p[i].TangentW, 1.0f);
     hout.Tex = p[i].Tex;
     
     return hout;
@@ -141,7 +141,7 @@ struct DomainOut
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
     float2 Tex : TEXCOORD;
-    float3 TangentW : TANGENT;
+    float4 TangentW : TANGENT;
 };
 
 // The domain shader is called for every vertex created by the tessellator.
